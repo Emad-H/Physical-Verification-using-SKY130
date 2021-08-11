@@ -99,6 +99,7 @@ Useful Magic Shortcuts:
 7. S key can be used to select layers
 8. Typing the ```what``` command in the magic console gives information on the selected layer
 9. ; key can be used to type commands in the magic console without moving between windows, until the Enter key is pressed
+10. I key can be used to select a device, and M key is used to move them
 
 The purple layer "metal1" below shall be most used to connect devices in further lab experiments.
 
@@ -157,4 +158,37 @@ This will tell ngspice to run a transient simulation for 1 ns and monitor voltag
 ![inv-tb](Day1/1-14.png)
 
 To generate the netlist we can click on the Netlist button, then we can simulate it in Ngspice by clicking the Simulate button. We should get the following waveform, which confirms that our schematic behaves as an inverter.
+
+![inv-simwave](Day1/1-15.png)
+
+Now that we have functionally verified our schematic, we can proceed to create a layout for it. To do this we must go back to our inverter schematic. first, we must ensure that we click on the Simulation menu and select the "LVS netlist: Top Lvel is a .subckt" option. We wait a few seconds and go back to the Simulation menu to check wheter a tick mark appears beside the aforementioned option. This verifies if we have properly defined a sub circuit for creating a layout cell with pins in the layout. Finally, we generate a netlist for the schematic by clicking the Netlist button and exit Xschem.
+
+Now we can import the scehmatic to the layout in Magic. First we run magic, then click on File > Import SPICE and then select the inverter.spice file from the xschem directory. If done correctly, we should see the followinf layout open up in magic.
+
+![mag-inv](Day1/1-16.png)
+
+As you can see, the schematic import does not know how to do analog place and route as it is very complicated. We must place them in the best positions and wire them up manually. First, we can start by palcing the pfet device above the nfet and adjusting the placement of the input, ouput and supply pins. We should get the following.
+
+![inv-layout](Day1/1-17.png)
+
+Next, we must set some parameters that are only adjustable in the layout which will make it more convenient to wire the whole layout up. First, we set the "Top guard ring via coverage" to 100. This will put a local interconnect to metal1 via ta the top of the guard ring. Next, for "Source via coverage" put +40 and for "Drain via coverage" put -40. This will split the source drain contacts, amking it easy to connect them with a wire. For the nfet, we set the "Bottom guard ring via coverage" to 100, while the source and drain via coverages are set to +40 and -40, respectively, like the pfet.
+
+Now, we can start to paint the wires using metal1 layers. First, we connect the source of the pfet to Vdd and source of the nfet to Vss. Next, we connect the drains of both mosfets to the output. Finally, the input is connected to all the poly contacts of the gate. Now, we should get something as shown below.
+
+![inv-con-layout](Day1/1-18.png)
+
+Now, we can sav the file and select the autowrite option. Then we run the following commands in the magic console.
+
+```
+extract do local
+extract all
+```
+
+The first command ensures that magic writes all results to the local directory. The second command does the actual extraction. As the output is in magics own format, but we want to simulate the netlist in spice, so we use the command ```ext2spice lvs``` which sets up the netlist to heirarchical spice output in ngspice format with no parasitic components which is good for simulation but not for running lvs. Next, we run the command ```ext2spice``` which generates the spice netlist. Now we can quite magic.
+
+To run LVS, we can first clear any unwanted files from the mag subdirectory. The .ext files are just intermediate results from the extraction and can be removed using the command ```rm *.ext``` if needed. We can also clean up extra .mag files using the command ```/usr/share/pdk/bin/cleanup_unref.py -remove .```, which were any paramaterised cells that were created and saved but not used in the design.
+
+Now we can run LVS by entering the netgen subdirectory and using the command ```netgen -batch lvs "../mag/inverter.spice inverter" "../xschem/inverter.spice inverter"```. Remember to always use the layout netlist first and schematic netlist second as then in the side by side result the layout is on the left and the schematic is on the right. Each netlist is represented by a pair of keywords in quotes, where the first is the location of the netlist file and the second is the name of the subcircuit to compare. As we can see from the result below, there was an issue in the wiring and the netlists do not match.
+
+![lvs](Day1/1-19.png)
 
