@@ -221,7 +221,7 @@ As chips get denser, the scale of physical verification increases. While chip de
 
 While initially physical verification was conducted from independent sources, and more the independent sources, the better. Nowadays, in the age of automation, wherein chips are designed from a single source (RTL design), the LVS process is now about checking the design through different flows; one starting at the RTL source and working forwards, while the second starting at the finished layout and working backwards. This way the tools used cross check each other.
 
-![lvs-flow](Day2/1-0.png)
+![lvs-flow](Day2/2-0.png)
 
 Even though the chip design process is automated, there are still points where manual intervention occurs, and physical verification must check that any manual intervention hasn't broken something. Though, mostly in case of errors we look for how the tool got it wrong and how we can modify the setups to overcome the problem. Increasing the number of tools used, increases the robustness of the physical verification process. 
 
@@ -242,7 +242,7 @@ The GDSII format is now the industry standard accross foundries for representing
 
 The layout tool needs to be able to independently generate a netlist by looking at nothing other than the mask geometry of the layout. This process is known as Extraction. Extraction in Magic is a two stage process, wherein magic generates an intermediate netlist format called the .ext, after which it is converted to the required netlist format such as spice.
 
-![ext-in-mag](Dta2/1-1.png)
+![ext-in-mag](Dta2/2-1.png)
 
 All devices, instances, connections between cells, subcells, nets, as well as parasitics are present in the netlist. This netlist can be fed to a simulator such as Ngspice, along with a schematic captured netlist to compare the results of the two. 
 
@@ -325,7 +325,7 @@ LVS also employs the concept of Black-Boxing, where the tool compares the netlis
 
 This is a physical verification method used to compare 2 layouts. Here, an XOR operation is applied on the masks of the two layouts. Where both the masks either have nothing or share the same geometry, we see nothing, and only where one mask has something and the other mask has nothing, or vice versa, do we see something. This is useful in mask revisions.
 
-![xor_ver](Day2/1-3.png)
+![xor_ver](Day2/2-2.png)
 
 To run an XOR operation in Magic, we can use the following commands.
 
@@ -336,13 +336,229 @@ load layout2_name
 xor destination_name
 ```
 
-### Lab - 
+### Lab - GDS read and Input Styles
+
+First, we shall create a project directory and set it up for running a Magic environment, as we did in previous lab sessions.
+
+![lab2-mag-mkdir](Day2/2-3.png)
+
+Next, let's explore the cif styles in Magic. To view the possible styles, we use the command `cif listall istyle`. We can also see the current style by using `cif list istyle`. This is shown below. The default style is sky130(vendor). While these 2 commands give us the required information, we can quickly access both data in a single command by attempting to call a bogus style.
+
+![cif-styles](Day2/2-4.png)
+
+Let's now compare how each of the different input styles affect the layout. First, we will check the sky130() style. To do this we can set the style using `cif istyle sky130()`.
+
+Now, let's read the GDS files from the PDK using the command `gds read /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/gds/sky130_fd_sc_hd.gds` in the magic console. Since it is a library, the console lists all the subcells. To see the available top level cells, we can run the command `cellname top`. The same thing can be accessed with the menu button Options > Cell Manager. We shall load a simple and2_1 cell. The layout is shown below.
+
+![def-style](Day2/2-5.png)
+
+As you can see, the labels in the layout view are marked yellow, which means they are traeted as regular text. Now, we shall use the sky130(vendor) style. To do this, run `cif istyle sky130(vendor)` and then read the gds files from the library. The current and2_1 layout will automatically be overwritten. Let's see what the new layout looks like.
+
+![vendor-style](Day2/2-6.png)
+
+Here, the labels are colored blue, which means they are treated as ports. This shows that when dealing with vendor files, it is wise to use the vendor style.
+
+If you do not want to automatically overwrite existing cells when reading from gds, we can use the `gds noduplicates true` option and then read the file again. This should give the following prompt on the magic console.
+
+![no-duplicate](Day2/2-7.png)
+
+### Lab - Ports and Port Indexes
+
+If we want to inquire about ports on a layout, we can select a port then use the command `port index` in the magic console. However, we can only select one port at a time for this method.
+
+![port-index](Day2/2-8.png)
+
+Another method is to use the command `port first` to find the index of the first port. we can then inquire about the port with the commands below.
+
+```
+port 1 name
+port 1 class
+port 1 use
+```
+
+This returns the infromation below.
+
+![port-first](Day2/2-9.png)
+
+Let's look at the and2_1 subcircuit definition by locating the library directory and opening the file labeled sky130_fd_sc_hd.spice. Here, if we search for the and2_1 cell definition, we can see the following.
+
+![and-def](Day2/2-10.png)
+
+While the cell definition shows the first port to be port A, the gds read of the file in magic shows the first port as VPWR. The port order mentioned in the definition, came from the vendor and should be considered correct. However, port numbering is considered metadata and is not included in the gds file. One way to add metadata to the gds file opened in magic, is to read its corresponding lef file. If we use the command `lef read /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_fd_sc_hd.lef` to read the lef file, magic annotates the layout with the metadata captured in the lef file.
+
+Now, when we run the port inquiries like earlier we can see the following.
+
+![port-lef](Day2/2-11.png)
+
+Here, the port order was not updated as lef files do not contain port order metadata. However, port class and use information was imported. Unfortunately, port order is only captured in the spice files from a vendor, but magic has no spice read command as these files provide no layout information.
+
+To read port order from spice files, we can use a custom .tcl script and call it in the magic console with `readspice /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice`. We may have to load the cell layout again from the Cell Manager. Now if weinquire the same port 1 information, we find the correct port ordering as below.
+
+![port-spice](Day2/2-12.png)
+
+### Lab - Abstract Views
+
+For abstraction, we cannot start with a cell in memory. Let us open a fresh Magic session and read the lef library file using `lef read /usr/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_fd_sc_hd.lef` and load the same and2_1 cell from the Cell Manager. This hould bring up an abstract view of the cell as shown below.
+
+![and-abstract](Day2/2-13.png)
+
+If we check port information, we can see that port order metadata isn't present in the lef files. 
+
+![and-abs-port](Day2/2-14.png)
+
+To do this, we can run the readspice script as before and load the cell again.
+
+![and-abs-port-ord](Day2/2-15.png)
+
+Abstract views however, are not exact representations of the layout. To show this, let's create a new layout using `load test` and instantiate the and cell using `getcell sky130_fd_sc_hd__and2_1`. This brings up an abstract view of the and2_1 cell as below.
+
+![and2-abs](Day2/2-16.png)
+
+If we try to write this lef file to a gds file using `gds write test`, we get the following error message.
+
+![and2-gds-error](Day2/2-17.png)
+
+If we try to read the gds file back into a new Magic session, we see the following layout.
+
+![and2-gds-read](Day2/2-18.png)
+
+The loaded gds looks different because Magic is not supposed to write abstraction views to gds. If we try to save the test file, and load it back into a new session of Magic, we see the following.
+
+![and2-gds-read](Day2/2-19.png)
+
+As we have done a `save test` and not `write all`, only the cell that was currently being edited gets saved, and not any subcells. As the cell currently being edited was from the SkyWater PDKs, it found the standard cell contents from the library path. This can be checked using `path`.
+
+![and2-gds-read](Day2/2-20.png)
+
+Now, if we were to write this into a gds file using `gds write test`, we would get a valid gds file. If we delve deeper into this and2_1 cell, we will observe that magic is referncing the metadata from a file not from what you see. This is another kind of abstraction, though Magic has tried to make it as faithful to the original as possible. This can be checked by selecting the cell and hitting the > key, then typing `property` in the console.
+
+![and2-property](Day2/2-21.png)
+
+Since this is still a form of abstraction, if we were to make the cell writeable and paint a layer of local interconnect over the cell, then write it to a gds as follows below, then the new gds file would remain unchanged wihtout the painted layer.
+
+![and2-paint](Day2/2-22.png)
+
+To create a vendor like cell, we can use the `gds readonly` property and execute the following commands in a new session of Magic.
+
+![readonly](Day2/2-23.png)
+
+Now, if we run the `property` command, we see the same metadata as before.
+
+![readonly2](Day2/2-24.png)
+
+### Lab - Basic Extraction
+
+Let's load the and2_1 cell in magic. Now, extract this cell using the commands below.
+
+![extract](Day2/2-25.png)
+
+Let's look at the spice file just created.
+
+![extract-spice](Day2/2-26.png)
+
+Now, let us run the extraction, but with parasitic capacitances included. To do this, use the following commands.
+
+![extract-c](Day2/2-27.png)
+
+The generated netlist is shown below, and contains lines starting with C to denote the parasitic capacitances.
+
+![extract-c2](Day2/2-28.png)
+
+If we do the same extraction, but this time with a cthresh of 0.1, we get reduced number of parasitics in the netlist.
+
+![extract-s0.1](Day2/2-29.png)
+
+![extract-c.1](Day2/2-30.png)
+
+To run a full R-C extraction, we can use the following commands.
+
+![ext2sim](Day2/2-31.png)
+
+![extresist](Day2/2-32.png)
+
+This shows the number of resistor nets found usable, and creates a .res.ext file which holds information to modify the existing .ext file for R parasitics. Next, we extract the netlist using the commands below.
+
+![extresist-ext](Day2/2-33.png)
+
+The generated netlist now contains both the R and C parasitic components and is shown below.
+
+![extrc1](Day2/2-34.png)
+
+![extrc2](Day2/2-35.png)
+
+While this method does work, it is extremely time consuming for large circuits. For large circuits, it is better to let the router conduct this job as it already knows where all wires are supposed to connect.
+
+### Setup for DRC
+
+To set up standard DRC, we can use the following commands to call a python script.
+
+![stand-drc](Day2/2-39.png)
+
+The output comes in a .txt file. We can view this using a text editor as below.
+
+![stand-drc-txt](Day2/2-40.png)
+
+As we can see, there are DRC errors in the vendor .mag file for the and2_1 subcell since the standard cell layouts do not have internal connections to the well and substrate to save room, and the layout depends on tap cells to make those connections.
+
+The reason we haven't seen these DRC errorsearlier in Magic is because the DRC script runs a full DRC check, while the default DRC style in Magic was a fast DRC. This is shown below.
+
+![drc style](Day2/2-41.png)
+
+If we change the DRC style to full, and force a DRC check, we can see DRC errors present in the standard cell.
+
+![drc full](Day2/2-43.png)
+
+![drc layout](Day2/2-42.png)
+
+![drc layout cmd](Day2/2-44.png)
+
+If we now add and align a tap cell in the existing layout, we see that there are no more DRC errors in the top level.
+
+![drc layout tap](Day2/2-45.png)
+
+If we descend into the and2_1 cell layer though, the DRC errors are still present. But in the top level layout, these errors get fixed.
+
+![drc layout bot](Day2/2-46.png)
+
+This is how Magic does hierarchical DRC checks. Now, we can save this layout as test3.
+
+### Setup for LVS
+
+First, let us create a subdirectory for Netgen. Next, we copy the Netgen setup and run Netgen on the and2_1 netlist files. We do this using the following commands.
+
+![netgen cmd](Day2/2-47.png)
+
+When executed, we get the following result, showing that the netlists match.
+
+![netgen res](Day2/2-48.png)
+
+### Setup for XOR
+
+To conduct XOR verification on masks, let us go back to Magic and load a locally saved version of the and2_1 layout so that it is editable.
+
+![xor](Day2/2-49.png)
+
+Next, we will make a small but noticable change on the layout using the `erase` command.
+
+![xor erase](Day2/2-50.png)
+
+We now run the following commands to perform the XOR operation against the standard cell. Here, the `-nolabels` option is used so that the operation is only performed on layout geometry.
+
+![xor res](Day2/2-51.png)
+
+As you can see, the resultant layout just contains the small layer of polysilicon that was erased. This operation scales very well for larger circuits as well. Let us try this on the test3 layout created earlier.
+
+We load the file, then flatten it into another layout called xortest. Now if we select the and2_1 cell and move it over to the right by 1 place, we should get the following.
+
+![xor and2](Day2/2-52.png)
+
+If we xor this moved layout with the flattened layout xortest, we get the resulting layout.
+
+![xor and2 res](Day2/2-53.png)
+
+While this layout looks rather bizarre, it shows every sliver of every layer that was slightly misaligned due to the shift. Thus, XOR operations are very useful to find such mistakes as well. Since, these kind of mistakes can easily occur while adjusting layouts by human intervention.
+
+## Day 3
 
 
-
-
-
-
-
-
-*day 1 Physical Verification and Design Flows, skywater libs. day 2 gds i/o styles/issues*
+*day 1 Physical Verification and Design Flows, skywater libs. day 2 gds i/o styles/issues, abstract end exercise extra, extract extra exc inv*
