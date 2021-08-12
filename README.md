@@ -188,7 +188,161 @@ The first command ensures that magic writes all results to the local directory. 
 
 To run LVS, we can first clear any unwanted files from the mag subdirectory. The .ext files are just intermediate results from the extraction and can be removed using the command ```rm *.ext``` if needed. We can also clean up extra .mag files using the command ```/usr/share/pdk/bin/cleanup_unref.py -remove .```, which were any paramaterised cells that were created and saved but not used in the design.
 
-Now we can run LVS by entering the netgen subdirectory and using the command ```netgen -batch lvs "../mag/inverter.spice inverter" "../xschem/inverter.spice inverter"```. Remember to always use the layout netlist first and schematic netlist second as then in the side by side result the layout is on the left and the schematic is on the right. Each netlist is represented by a pair of keywords in quotes, where the first is the location of the netlist file and the second is the name of the subcircuit to compare. As we can see from the result below, there was an issue in the wiring and the netlists do not match.
+Now we can run LVS by entering the netgen subdirectory and using the command ```netgen -batch lvs "../mag/inverter.spice inverter" "../xschem/inverter.spice inverter"```. Remember to always use the layout netlist first and schematic netlist second as then in the side by side result the layout is on the left and the schematic is on the right. Each netlist is represented by a pair of keywords in quotes, where the first is the location of the netlist file and the second is the name of the subcircuit to compare. As we can see from the result below, there was an issue in the wiring and the netlists do not match. This is due to wiring errors in the layout.
 
 ![lvs](Day1/1-19.png)
 
+If the layout is correct, the last step would be to validate the layout netlist again with parasitics included. We can include both resistive and capacitive parasitics in magic netlists, though this process is complicated and requires manual interventions, excluding it from the scope of this exercise. Capacitive parasitics can be easily included though, by using the following commands in the magic console window during extraction.
+
+```
+extract do local
+extract all
+ext2spice lvs
+ext2spice cthresh 0
+ext2spice
+```
+
+Here, the command ```ext2spice cthresh 0``` tells magic to add all the parasitic capacitances to the spice netlist. If we now view the netlist file in an editor, we can see multiple lines beginning with C, which detail the parasitic capacitances.
+
+![c-netlist](Day1/1-20.png)
+
+By ordering the original testbench pin layout according to the new netlist, and replacing the old subcircuit definition, we can run an ngspice simulation on the layout netlist with parasitic capacitances included. Though, the waveform should not change much.
+
+## Day 2 - Design Rule Checks and Layout Vs. Simulation
+
+### Fundamentals of Physical Verification
+
+As chips get denser, the scale of physical verification increases. While chip designs can be hierarchical, physical verification is not. The two primary aspects of physical verification are as follows:
+
+1. Design Rule Checks (DRC)
+ * Ensures that the design layout meets all the silicon foundry rules for mask making
+2. Layout vs. Schematic (LVS)
+ * Makes sure that the design layout electrically matches the design, as implemented in schematic form or any form that electrically describes the design spec
+
+While initially physical verification was conducted from independent sources, and more the independent sources, the better. Nowadays, in the age of automation, wherein chips are designed from a single source (RTL design), the LVS process is now about checking the design through different flows; one starting at the RTL source and working forwards, while the second starting at the finished layout and working backwards. This way the tools used cross check each other.
+
+![lvs-flow](Day2/1-0.png)
+
+Even though the chip design process is automated, there are still points where manual intervention occurs, and physical verification must check that any manual intervention hasn't broken something. Though, mostly in case of errors we look for how the tool got it wrong and how we can modify the setups to overcome the problem. Increasing the number of tools used, increases the robustness of the physical verification process. 
+
+### Data Formats and GDSII
+
+For some form of standardisation to describe integrated circuits, a standard file format is needed. These forats must describe both data (rectangles, subcells, polygons) and metadata (labels, cell boundaries and instance names, etc.) regarding IC layouts. 
+
+Some common file formats are:
+-  Caltech Intermediate form (.cif)
+-  GDSII stream format
+-  Open Artwork System Interchange Standard (OASIS)
+
+The GDSII format is now the industry standard accross foundries for representing IC layouts. what distinguishes GDS from other formats are its layer:purpose pairs. Instead of describing each layer with a name such as DIFF for diffusion, it describes them as a pair of numbers, seperated by a colon (ex. 65:20). Here, one number denotes the layer (such as diffusion, metal1, poly), while the other number denotes the purpose (such as blockage, net, drawing, label, pin, ,etc.). Though, layer:purpose pairs may be inconsistent accross foundries. More on the GDSII format can be found [here](https://boolean.klaasholwerda.nl/interface/bnf/gdsformat.html).
+
+>Note: Since most of these file formats do not describe all metadata (such as pin use/class, device types), it is very common to lose some of your metadata after writing out a full chip to gds.
+
+### Extraction Styles and Options in Magic
+
+The layout tool needs to be able to independently generate a netlist by looking at nothing other than the mask geometry of the layout. This process is known as Extraction. Extraction in Magic is a two stage process, wherein magic generates an intermediate netlist format called the .ext, after which it is converted to the required netlist format such as spice.
+
+![ext-in-mag](Dta2/1-1.png)
+
+All devices, instances, connections between cells, subcells, nets, as well as parasitics are present in the netlist. This netlist can be fed to a simulator such as Ngspice, along with a schematic captured netlist to compare the results of the two. 
+
+Even though magic can create a netlist for simulation, it has no idea how to actually simulate the netlist. To simulate a netlist from a layout, we must provide all the missing information. This includes the testbench netlist, along with the necessary stimuli for simulation. As the layout editor knows nothing about the actual device models, we need to use include statements to add all device models used in the layout. A subcircuit netlist is this generated netlist from the layout editor, and must be included as well. Finally, an analysis control block is needed to tell the simulator what kind of simulation to run as well as its simulation parameters.
+
+There are three extraction styles available in magic: ngspice(), ngspice(orig) and ngspice(si); and can be selected using the commands below.
+
+```
+extract style ngspice()
+extract style ngspice(orig)
+extract style ngspice(si)
+```
+
+Some extraction options in magic are as follows.
+
+```
+ext2spice lvs
+ext2spice cthresh value
+ext2spice scale on|off
+ext2spice hierarchy on|off
+ext2spice subcircuit top on|off
+ext2spice global on|off
+ext2spicemerge on|off
+```
+
+>Note: Magic also stores layer heights/thicknesses, and a three dimensional view of the layout can be rendered by magic's 3D engine using th menu button Option > 3D Display.
+
+### GDS Reading and Writing in Magic
+
+GDS files can be accessed in Magic with the ```gds``` command. To read a GDS file in magic, we use ```gds read file_name```. Some important read options ofr gds files in magic are listed below.
+
+```
+gds readonly true|false  //Allows ceratin cells to be read-only, preventing magic from changing their gds descriptions in the final output gds file
+gds flatglob expression  //Flattens cells in question to be merged up into the hierarchy above them, preventing unnecessary heierarchy in the layout
+gds flatten true
+gds noduplicates true    //Tells magic to ignore cell definitions in gds files that it already has in memory
+```
+
+GDS files can be written in magic using the command ```gds write file_name```, and some of its options are listed below.
+
+```
+gds library true      //Used to create gds library files with subcells with no concept of a top level layout
+gds addendum true     //Ignores read-only cell definitions when it generates an output
+gds merge true|false  //Turns rectangles and triangles present in the design into merged polygons for easier viewing
+```
+
+### DRC Rules in Magic
+
+Magic implements an interactive DRC, wherein it shows DRC errors when you make them. As this process is computationally expensive, magic uses 3 styles for running DRC, namely:
+1. ```drc(full)``` - complete checks (slow)
+2. ```drc(fast)``` - typical checks (fast)
+3. ```drc(routing)``` - metal checks (fastest)
+
+```drc off``` can be used to turn the DRC interactive engine off. To prevent the DRC engine from running cheks on a cell that is knwon to be good, is to keep it in abstract view. While magic does check inside each cell in a layout, it is possible that the errors inside a cell get resolved in the hierarchy above it.
+
+The two basic DRC rule checking methods in Magic are,
+
+1. Edge-based rules (sapcing, width, surround, extend)
+2. Boolean geometry rules (AND, XOR, GROW, SQUARES, etc.)
+
+### LVS Setup for Netgen
+
+Netgen is a tool used for running LVS checks. It knows nothing about layouts, and only knows about netlists and how to read and compare them. Netgen does not need to know anything about any components in the design, it juts needs to know wheter they match in the layout and schematic.
+
+The LVS technology setup file tells the LVS tool what all the device names are, how they should or shouldn't be combined in series and parallel, whether any pins on the device are permutable (interchangeable), which properties are interesting to compare betwen netlists, which properties should be ignored, and whether any device must be ignored.
+
+Netgen commands used in the open_pdks setup file are:
+1. `property`
+2. `ignore`
+3. `permute`
+4. `equate`
+
+The LVS tool handles hierarchy by making certain assumptions about the circuite, like the subcircuits will have the same name or contents in the schematic and layout. Next it will survey the hierarchies in both the netlists to check whether these assumptions are true. It will attempt to check whether it can make the hierarchies match better by flattening one or more cells. After it knows that a subcircuit in one netlist is supposed to be a match in the other netlist, then it conducts a full match analysis. If it cannot get the circuits to match, then it concludes that perhaps it should not try to match the two subcircuits at all, absorbing both of them into the parent cell in the hopes that this will resolve the issues with the hierarchy. Although, flattening everything in the hierarchy can cause cascading mismatch problems, leading to a huge mess in the LVS. Thus, a proper approach is required when tackling LVS.
+
+One useful feature of Netgen is its ability to do not just layout vs. schematic, but layout vs. verilog as well, though certain syntax in verilog are illegal and not supported.
+
+LVS also employs the concept of Black-Boxing, where the tool compares the netlists by gate and not transistors. This means it checks the device behaviour, and not each individual transistor, though this can be done if needed.
+
+### XOR Verification
+
+This is a physical verification method used to compare 2 layouts. Here, an XOR operation is applied on the masks of the two layouts. Where both the masks either have nothing or share the same geometry, we see nothing, and only where one mask has something and the other mask has nothing, or vice versa, do we see something. This is useful in mask revisions.
+
+![xor_ver](Day2/1-3.png)
+
+To run an XOR operation in Magic, we can use the following commands.
+
+```
+load layout1_name
+flatten destination_name
+load layout2_name
+xor destination_name
+```
+
+### Lab - 
+
+
+
+
+
+
+
+
+*day 1 Physical Verification and Design Flows, skywater libs. day 2 gds i/o styles/issues*
