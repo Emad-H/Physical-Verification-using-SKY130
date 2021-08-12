@@ -1,6 +1,6 @@
 # Physical Verification using SKY130
 
-![workshop-flyer](Workshop-Flyer.png)
+![workshop-flyer](Workshop-Flyer.jpeg)
 
 A 5 day cloud based virtual training workshop conducted by VSD-IAT from 11<sup>th</sup> to 15<sup>th</sup> August. The link to the workshop webpage can be found [here](https://www.vlsisystemdesign.com/physical-verification-using-sky130/). Below is a brief, day-wise documentation about the topics covered in the course, along with my implementations of the lab sessions.
 
