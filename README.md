@@ -558,7 +558,7 @@ If we xor this moved layout with the flattened layout xortest, we get the result
 
 While this layout looks rather bizarre, it shows every sliver of every layer that was slightly misaligned due to the shift. Thus, XOR operations are very useful to find such mistakes as well. Since, these kind of mistakes can easily occur while adjusting layouts by human intervention.
 
-## Day 3 - Front-end and Back-end DRC
+## Day 3 - Design Rule Checking
 
 ### Fundamentals of Design Rule Checking
 
@@ -675,7 +675,195 @@ Electrical Rule Checks (ERC) are checks for a layout that is DRC correct but cau
 
 ### Lab - Width and Spacing Rules
 
+First, we must install some prerequisite files by running a git clone of the following [repository](https://github.com/RTimothyEdwards/vsd_drc_lab.git). This contains shell script that loads Magic with the correct graphics, and with the SkyWater PDKs loaded.
 
+![gitclone](Day3/3-0.png)
+
+Let's look at some width and spacing DRC examples by loading in the file titled exercise1.mag.
+
+![ex1](Day3/3-1.png)
+
+Let us zoom into example a, and select the cursor box over the layout. Next, we select the DRC menu button and click on DRC Report. This should tell us what DRC errors were found inside the cursor box.
+
+![drc width](Day3/3-2.png)
+
+We can select the metal layer and run a DRC report for it. We should see no errors found as it looks for DRC errors only inside the selected area.
+
+![drc width 2](Day3/3-3.png)
+
+As it is a width error, we can check the width of the metal layer y selecting it and pressing the B key, which tells the dimensions of the cursor box.
+
+![drc width b](Day3/3-4.png)
+
+Here we see it is 0.06 microns, while the minimum width should be 0.14 microns. To visualize distances better, we can set the grid to be on by going to the menu button Window > Set Grid 0.10um. We can also turn on th setting 'Snap-to-grid on' from the same menu.
+
+To increase the width of the metal layer, we can either manually set the cursor box to the size required, then paint it using the middle mouse button. Or we can do it via console commands by typing `box width 0.14um` and `paint m2`.
+
+![drc width fix](Day3/3-5.png)
+
+Now onto the spacing exercise. Let us run a DRC report on it.
+
+![drc space](Day3/3-6.png)
+
+The report shows a spacing error. The white dots on each of the metal1 pieces indicate 1 error, meaning magic counts this spacing error as 2 DRC errors, and by moving either of the rectangles away, the DRC error can be fixed. We can do this by selecting any of the rectangles, and using the numpad keys 4 and 6 to move them. Though this can also be done using the command `move e 0.14um` which moves the selected layer to the east.
+
+![drc space fix](Day3/3-7.png)
+
+### Lab - Wide Spacing and Notch Rules
+
+Let us look at exerces 1 c. If we select the cursor box over the area and run a DRC report, we can find 2 errors. The first is a regular spacing error for the smaller rectangle, and the second shows a wide spacing error for the larger rectangle.
+
+![drc wide](Day3/3-8.png)
+
+This is a simple fix, and can be done by moving either of the boxes by a distance of 0.4um away, as shown below.
+
+![drc wide fic](Day3/3-9.png)
+
+Now, let's see the notch error. If we runa DRC report, it shows up as a spacing error, since notch errors are generally the same as spacing errors for most processes.
+
+![drc notch](Day3/3-10.png)
+
+As this is the same layer, we cannot simply move this around. To fix this, we put the cursor box over one half of the shape. Next we use the area select or A key to select just the top portion of the shape like shown below.
+
+![drc notch 1](Day3/3-11.png)
+
+Now we could use the move cammond to move the shape upwards, but that would just split the shape in half. Instead we need to stretch the layer. For this we hold Shift+8 to stretch the shape upwards, bringing the DRC count to 0.
+
+![drc notch 1](Day3/3-12.png)
+
+We can also apply stretching when needed to fix width rule errors in a similar fashion as shown below.
+
+![drc width2](Day3/3-13.png)
+
+![drc width3](Day3/3-14.png)
+
+### Lab - Contact Cuts (Via) and its DRC Errors
+
+Let us load the file exercise2.mag and look at exercise 2a. Here, when we run a DRC report, we see it is a simple via size error.
+
+![2a](Day3/3-15.png)
+
+We can fix this easily by doing an area select and strecth operation twice. Once horizontally, and once vertically.
+
+![2a fix](Day3/3-16.png)
+
+For example 2b, we have a large via with an array of contact cuts. We cannot see the contact cuts yet though, as Magic displays them as a single via for viewing ease. To see the contact cuts, we can run the command `cif see xxx` to check the cif layer names.
+
+![2b layers](Day3/3-17.png)
+
+The layer we need is called MCON, or local interconnect for metal1, and by using the command below, we can view the actual contact cuts 
+
+![2b layers](Day3/3-18.png)
+
+We can use the commands `feedback why` while viewing the cif layer to get information about it, and `feedback clear` to stop viewing the contact cuts.
+
+In our earlier example 2a, only one contact cut fits in the via.
+
+![2a cut](Day3/3-19.png)
+
+If we reduce the size of the via and check for contact cuts, we see the following feedback error as Magic cannot fit any contact cuts in the small area.
+
+![2a error](Day3/3-20.png)
+
+Now let us explore example 2c. Here, we have an overlap error as shown below.
+
+![2c](Day3/3-21.png)
+
+To fix this, we can simply select the layer then use the box grow command as shown. Here, the c stands for center, which means grow around center. Next we paint in a layer of metal1 to fix the overlap error.
+
+![2c grow](Day3/3-22.png)
+
+However, now we are faced with the following size error. The metal must be longer in any one direction, horizontally or vertically.
+
+![2c err2](Day3/3-23.png)
+
+We can fix this by using a box grow in the east then west directions, then painting in a layer of metal1. Now, the DRC error goes away.
+
+![2c fix](Day3/3-24.png)
+
+To automatically generate a via in Magic without any box manipulation, we can do the following. Let's see example 2d. If we use the wiring tool by cycling through the tools with the space key, we can quickly draw wires. By clicking SHIFT+left MB we can move up a metal layer until we reach the top most metal 5 layer. Similarly, we can move down layers with the SHIFT+right MB until we reach the metal interconnect.
+
+![2d](Day3/3-25.png)
+
+Doing this automatically generates contact cuts for the material. We can check this using the commands below.
+
+![2d see](Day3/3-26.png)
+
+### Lab - Minimum Area and Minimum Hole Rule
+
+Let us load in example3.mag and look at 3a. Here, we have a layer of metal with the following DRC error.
+
+![3a](Day3/3-27.png)
+
+If we select the metal and use the B key, we see that the current area is 0.2um<sup>2</sup>.
+ 
+![3a area](Day3/3-28.png)
+
+To fix this, we can easily area select and stretch the layer to meet the requirement.
+
+![3a fix](Day3/3-29.png)
+
+>Note: Wire routes almost always meet the minimum area rules when using the wiring tool. However, when jumping up by 2 or more layers, it is possible to violate this rule, as shown below , where there isn't enough metal 1 to fit the minimum area rule, along with other violations..
+
+![min area](Day3/3-30.png)
+
+Next, let us look at example 3b. Here we have a minimum hole area violation, though Magic does not show it as one. To se this DRC error, we need to run Magic in the full DRC mode. We can do this by clicking oon the menu button DRC > DRC complete. Next we must tell Magic to update the DRC count, and then run a DRC report.
+
+![3b](Day3/3-31.png)
+
+If we manually set the cursor box to the size of the hole, we see it is 0.07um<sup>2</sup> which is smaller than allowed. To fix this we must manually erase sections of the metal till the hole is big enough to pass DRC.
+
+![3b fix](Day3/3-32.png)
+
+### Wells and Deep N-Wells
+
+Let's look at exercise4.mag which has wells and taps, so our DRC check needs to be set at full to check for these. Let us see example 4a. We have a basic well error, since the wells do not have taps. The n-well shows an error as it is currently floating, though the "p-well" does not since this process doesn't actually consider p-wells unless they are in deep n-wells, and are instead counted as p-substrates.
+
+![4a](Day3/3-33.png)
+
+To fix this, we first paint a layer of n type material into the n well. The layer is called nsubstratendiff. Though this does not fix the DRC error.
+
+![4a p1](Day3/3-34.png)
+
+The n well must not be floating, so the tap should be connected to a layer of local interconnect. So let us do this by painting a layer of nsubstratencontact. While this gtes rid of the n-well DRC error, it creates smaller errors like overlap and surround.
+
+![4a p2](Day3/3-35.png)
+
+Let us adjust the layers using what we have learnt till now by growing, stretching and adding in local interconnect, and we get no DRC errors.
+
+![4a p2](Day3/3-36.png)
+
+Moving on to 4b, we have the following error. The p well has to be connected to a contact if it has a tap.
+
+![4b](Day3/3-37.png)
+
+By adding a psubstratepcontact, some local interconnect, and ajust the areas of the layers, we get a DRC correct layout.
+
+![4b fix](Day3/3-38.png)
+
+For the deep n-well in 4c, we have the following DRC errors.
+
+![4c](Day3/3-39.png)
+
+To fix this, we first grow the area of the deep n well. Next we must move it a certain minimum distance away from the n well in 4b, as it seems to be interacting with it. Finally we get the updated error below.
+
+![4c](Day3/3-40.png)
+
+We must now add in an n well overlap around the deep n well. We can do this by painting in a n well layer, then using the wire tool to draw the rest of it.
+
+![4c 1](Day3/3-41.png)
+
+Finally, we have to add in a tap layer with an interconnect, like in previous examples. Now, we have no DRC errors.
+
+![4c fix](Day3/3-42.png)
+
+Alternatively, for deep n-wells we can add a full setup with guard rings by simply clickin on the menu button Devices 1 > deep n-well region. This gives the following result.
+
+![4c fix2](Day3/3-43.png)
+
+### Lab - Derived Layers
+
+Let us load exercise5.mag, and look at 5a. These derived layers look like a transistor, and we can check to see
 
 
 
