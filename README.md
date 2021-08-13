@@ -488,7 +488,7 @@ The generated netlist now contains both the R and C parasitic components and is 
 
 While this method does work, it is extremely time consuming for large circuits. For large circuits, it is better to let the router conduct this job as it already knows where all wires are supposed to connect.
 
-### Setup for DRC
+### lab - Setup for DRC
 
 To set up standard DRC, we can use the following commands to call a python script.
 
@@ -522,7 +522,7 @@ If we descend into the and2_1 cell layer though, the DRC errors are still presen
 
 This is how Magic does hierarchical DRC checks. Now, we can save this layout as test3.
 
-### Setup for LVS
+### Lab - Setup for LVS
 
 First, let us create a subdirectory for Netgen. Next, we copy the Netgen setup and run Netgen on the and2_1 netlist files. We do this using the following commands.
 
@@ -532,7 +532,7 @@ When executed, we get the following result, showing that the netlists match.
 
 ![netgen res](Day2/2-48.png)
 
-### Setup for XOR
+### Lab - Setup for XOR
 
 To conduct XOR verification on masks, let us go back to Magic and load a locally saved version of the and2_1 layout so that it is editable.
 
@@ -558,7 +558,50 @@ If we xor this moved layout with the flattened layout xortest, we get the result
 
 While this layout looks rather bizarre, it shows every sliver of every layer that was slightly misaligned due to the shift. Thus, XOR operations are very useful to find such mistakes as well. Since, these kind of mistakes can easily occur while adjusting layouts by human intervention.
 
-## Day 3
+## Day 3 - Front-end and Back-end DRC
+
+### Fundamentals of Design Rule Checking
+
+Every silicon manufacturing process has its own tolerances on the designs being manufactured. These tolerances are dependant on the conditions and machines used in the fabrication environment, and are based on probabilities of expected failure/defects found in a manufactured batch, in parts per million. Thus, each process has its own set of rules that need to be adhered to, and these rules are given on the geometry of the layout to prevent chip failure. These are known as design rules, and the process of adhering to these rules is done by design rule checking.
+
+The SkyWater process design rules can be found in detail [here](https://skywater-pdk.readthedocs.io/en/latest/rules.html).
+
+### Back-end Metal Layer Rules
+
+**1. Width Rule**
+* Gives the minimum width of a layer.
+* Not adhering to this can cause spot defects to be larger than the width of the layer itself, causing open circuits in wires.
+* Minimum width for implants are given based on angle of implant and crystalline structure of the silicon. Implants in layer with very small widths may not act like they are supposed to.
+* Feature size of a process gives the minimum width of a transistor (or its polysilicon layer)
+
+**2. Spacing Rule**
+* Gives the minimum spacing between two layers.
+* Not adhering to spacing rales may cause material defects creating shorts between layers.
+* Has several complications based on optical effects of the mask.
+
+**3. Wide-Spacing Rule**
+* If a wire or piece of layout is wider than a given distance, then other wires of any width must be kept away from it by an additional amount of space.
+
+**4. Notch Rule**
+* Similar to the spacing rule (generally the same in most processes).
+* Gives the minimum space between two forks of the same piece of layer.
+
+**5. Minimum and Maximum Area Rules**
+* Gives the minimum and maximum areas for a metal layer.
+* Prevents delamination issues in the metal surface.
+* Implants only have minimum area rules, due to concerns same as that of the width rule.
+
+**6. Minimum Hole Area Rule**
+* Gives the minimum are a hole in a metal layer must be.
+* Small holes in a metal layer make it more likely that oxide grown over the hole may not completely fill it.
+
+**7. Contact Cut Rules**
+* A Via is the contact cuts made between metal layers to connect them using other metals.
+* As the holes connect layers from above and below, their positioning is critical.
+* Contact cut rules ensure masks can be positioned correctly.
+* Contact cuts must be surrounded by a minimum amount of metal around them.
+* Magic displays arrays of contact cuts for the same layer to layer connect as a single large contact cut (via) for design simplicity.
+
 
 
 *day 1 Physical Verification and Design Flows, skywater libs. day 2 gds i/o styles/issues, abstract end exercise extra, extract extra exc inv*
