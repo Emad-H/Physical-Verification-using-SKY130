@@ -695,7 +695,7 @@ As it is a width error, we can check the width of the metal layer y selecting it
 
 ![drc width b](Day3/3-4.png)
 
-Here we see it is 0.06 microns, while the minimum width should be 0.14 microns. To visualize distances better, we can set the grid to be on by going to the menu button Window > Set Grid 0.10um. We can also turn on th setting 'Snap-to-grid on' from the same menu.
+Here we see it is 0.06 microns, while the minimum width should be 0.14 microns. To visualize distances better, we can set the grid to be on by going to the menu button Window > Set Grid 0.10um. We can also turn on the setting 'Snap-to-grid on' from the same menu.
 
 To increase the width of the metal layer, we can either manually set the cursor box to the size required, then paint it using the middle mouse button. Or we can do it via console commands by typing `box width 0.14um` and `paint m2`.
 
@@ -711,7 +711,7 @@ The report shows a spacing error. The white dots on each of the metal1 pieces in
 
 ### Lab - Wide Spacing and Notch Rules
 
-Let us look at exerces 1 c. If we select the cursor box over the area and run a DRC report, we can find 2 errors. The first is a regular spacing error for the smaller rectangle, and the second shows a wide spacing error for the larger rectangle.
+Let us look at exercise 1 c. If we select the cursor box over the area and run a DRC report, we can find 2 errors. The first is a regular spacing error for the smaller rectangle, and the second shows a wide spacing error for the larger rectangle.
 
 ![drc wide](Day3/3-8.png)
 
@@ -719,7 +719,7 @@ This is a simple fix, and can be done by moving either of the boxes by a distanc
 
 ![drc wide fic](Day3/3-9.png)
 
-Now, let's see the notch error. If we runa DRC report, it shows up as a spacing error, since notch errors are generally the same as spacing errors for most processes.
+Now, let's see the notch error. If we run a DRC report, it shows up as a spacing error, since notch errors are generally the same as spacing errors for most processes.
 
 ![drc notch](Day3/3-10.png)
 
@@ -727,7 +727,7 @@ As this is the same layer, we cannot simply move this around. To fix this, we pu
 
 ![drc notch 1](Day3/3-11.png)
 
-Now we could use the move cammond to move the shape upwards, but that would just split the shape in half. Instead we need to stretch the layer. For this we hold Shift+8 to stretch the shape upwards, bringing the DRC count to 0.
+Now we could use the move command to move the shape upwards, but that would just split the shape in half. Instead we need to stretch the layer. For this we hold Shift+8 to stretch the shape upwards, bringing the DRC count to 0.
 
 ![drc notch 1](Day3/3-12.png)
 
@@ -743,7 +743,7 @@ Let us load the file exercise2.mag and look at exercise 2a. Here, when we run a 
 
 ![2a](Day3/3-15.png)
 
-We can fix this easily by doing an area select and strecth operation twice. Once horizontally, and once vertically.
+We can fix this easily by doing an area select and stretch operation twice. Once horizontally, and once vertically.
 
 ![2a fix](Day3/3-16.png)
 
@@ -807,7 +807,7 @@ To fix this, we can easily area select and stretch the layer to meet the require
 
 ![min area](Day3/3-30.png)
 
-Next, let us look at example 3b. Here we have a minimum hole area violation, though Magic does not show it as one. To se this DRC error, we need to run Magic in the full DRC mode. We can do this by clicking oon the menu button DRC > DRC complete. Next we must tell Magic to update the DRC count, and then run a DRC report.
+Next, let us look at example 3b. Here we have a minimum hole area violation, though Magic does not show it as one. To se this DRC error, we need to run Magic in the full DRC mode. We can do this by clicking on the menu button DRC > DRC complete. Next we must tell Magic to update the DRC count, and then run a DRC report.
 
 ![3b](Day3/3-31.png)
 
@@ -825,7 +825,7 @@ To fix this, we first paint a layer of n type material into the n well. The laye
 
 ![4a p1](Day3/3-34.png)
 
-The n well must not be floating, so the tap should be connected to a layer of local interconnect. So let us do this by painting a layer of nsubstratencontact. While this gtes rid of the n-well DRC error, it creates smaller errors like overlap and surround.
+The n well must not be floating, so the tap should be connected to a layer of local interconnect. So let us do this by painting a layer of nsubstratencontact. While this gets rid of the n-well DRC error, it creates smaller errors like overlap and surround.
 
 ![4a p2](Day3/3-35.png)
 
@@ -837,7 +837,7 @@ Moving on to 4b, we have the following error. The p well has to be connected to 
 
 ![4b](Day3/3-37.png)
 
-By adding a psubstratepcontact, some local interconnect, and ajust the areas of the layers, we get a DRC correct layout.
+By adding a psubstratepcontact, some local interconnect, and adjust the areas of the layers, we get a DRC correct layout.
 
 ![4b fix](Day3/3-38.png)
 
@@ -857,7 +857,7 @@ Finally, we have to add in a tap layer with an interconnect, like in previous ex
 
 ![4c fix](Day3/3-42.png)
 
-Alternatively, for deep n-wells we can add a full setup with guard rings by simply clickin on the menu button Devices 1 > deep n-well region. This gives the following result.
+Alternatively, for deep n-wells we can add a full setup with guard rings by simply clicking on the menu button Devices 1 > deep n-well region. This gives the following result.
 
 ![4c fix2](Day3/3-43.png)
 
@@ -887,7 +887,7 @@ This is a high voltage nmos and should have an HVI or high voltage implant. We c
 
 ![5b hvi](Day3/3-49.png)
 
-The high voltage implant is slightly larger than even the NSDM implant layer, though the high voltage implant does not cover the tap contact since the sunstrate is always grounded so it technically never gets to see high voltage. Though, there is a high voltage tap and tap contact type which can be painted over the existing tap. Now, if we look at the iplant layer, we can see the HVI implant cob=vers the tap as well.
+The high voltage implant is slightly larger than even the NSDM implant layer, though the high voltage implant does not cover the tap contact since the substrate is always grounded so it technically never gets to see high voltage. Though, there is a high voltage tap and tap contact type which can be painted over the existing tap. Now, if we look at the implant layer, we can see the HVI implant cob=vers the tap as well.
 
 ![5b hvi tap](Day3/3-51.png)
 
@@ -895,7 +895,7 @@ HVI layers must always be kept a certain distance away from regular low voltage 
 
 ![5b extra](Day3/3-50.png)
 
-Moving onto exercise 5c, poly contacts need a special type of layer etch and not an implant, called NPC or nitride poly cut. The NPC etches through any nitride residue on the poly to ensure firmer contact between the poly and local inteconnect. We can see this using the command below.
+Moving onto exercise 5c, poly contacts need a special type of layer etch and not an implant, called NPC or nitride poly cut. The NPC etches through any nitride residue on the poly to ensure firmer contact between the poly and local interconnect. We can see this using the command below.
 
 ![5c 1](Day3/3-52.png)
 
@@ -929,7 +929,7 @@ In 6b, we have an esdfet designed to survive high voltages, and it purposefully 
 
 ![6b](Day3/3-59.png)
 
-The only way in Magic to ignore rule errors for a dvice that is known good, is to abstract it. Though abstract views are in a seperate lef directry, but that is not what is needed here. All library views are abstract in a way, because they contain pointers to gds files, and thus what is shown is no more than Magic's best attempt to represent the gds data. We can change the layout without changing what is written out to gds, which is dangerous and generally only used for read only files that do not get affected. We can, however, use this to our advantage by making the layout look DRC clean and not flag false positives.
+The only way in Magic to ignore rule errors for a device that is known good, is to abstract it. Though abstract views are in a separate lef directory, but that is not what is needed here. All library views are abstract in a way, because they contain pointers to gds files, and thus what is shown is no more than Magic's best attempt to represent the gds data. We can change the layout without changing what is written out to gds, which is dangerous and generally only used for read only files that do not get affected. We can, however, use this to our advantage by making the layout look DRC clean and not flag false positives.
 
 First, we select the cell with the I key, check its file path and change it to the current working directory. Next, we descend into the cell and save it to disk. Now, we can confirm that the cell still points to a valid gds file with the `property` command.
 
@@ -947,7 +947,7 @@ Now, we can fix the DRC errors using the methods stated earlier.
 
 ### Lab - Angle And Overlap Rule
 
-If we recall, Magic has a grid set up that is based on the manufacturing grid provided. The manufacturing grid for this process is 0.005um x 0.005um. Magic scales up the grid by a factor of 2, so the samllest box possible should be 0.01um by 0.01um. To make the box any smaller, we can use `snap internal` then make the box to the size of the manufacturers grid. We could also scale down Magic's internal grid with `scalegrid 1 2`, but it is prohibited.
+If we recall, Magic has a grid set up that is based on the manufacturing grid provided. The manufacturing grid for this process is 0.005um x 0.005um. Magic scales up the grid by a factor of 2, so the smallest box possible should be 0.01um by 0.01um. To make the box any smaller, we can use `snap internal` then make the box to the size of the manufacturers grid. We could also scale down Magic's internal grid with `scalegrid 1 2`, but it is prohibited.
 
 Similarly, if we create a tringle that is an odd number width, and overlap it with another odd width triangle, magic will try to legalise the overlap vertex as follows.
 
@@ -977,7 +977,7 @@ We fix this with the following commands to erase and redraw the angled edge at 4
 
 ![7c fix](Day3/3-69.png)
 
-We can now add small amount of metal1 on top of the shape to sompensate for the width error caused by the additional 1 unit growth, and we get a DRC error free shape.
+We can now add small amount of metal1 on top of the shape to compensate for the width error caused by the additional 1 unit growth, and we get a DRC error free shape.
 
 ![7c fix2](Day3/3-70.png)
 
@@ -993,11 +993,11 @@ In 7e, we can see that overlaps in contacts have different rules. If contacts ov
 
 ![7e1](Day3/3-73.png)
 
-If we push into one of the contact layers, we can see that here the contact cuts are aligned perfectly, and in the top lvele cell the cuts had to have been aranged differently to be error free.
+If we push into one of the contact layers, we can see that here the contact cuts are aligned perfectly, and in the top level cell the cuts had to have been arranged differently to be error free.
 
 ![7e1 zpush](Day3/3-74.png)
 
-To fix this, we can flatten it. This is shown below ehere the flattened copy now is DRC free, as both contacts are now in the same layer and there is no concern of overlap.
+To fix this, we can flatten it. This is shown below where the flattened copy now is DRC free, as both contacts are now in the same layer and there is no concern of overlap.
 
 ![7e1 fix](Day3/3-75.png)
 
@@ -1054,7 +1054,7 @@ For detailed information, we can do the following.
 
 ![10 ant debug](Day3/3-85.png)
 
-This gives us antenna ratios that triggered the error. The ratio of the area of the metal to the area of the gate is more than twice the permissible value of 400. There are 2 ways to fix this. First, we can tie down the route to a pice of diffusion (which acts like a diode). The antenna check tells us the error is at metal2, so we can place a standard cell diffusion diode anywhere at metal2. In this example, the diode is already places on th left of the cell, and we just need to wire the input where the violation starts to the diode as shown below. The wire needs to be contacted down into the diode with the SHIFT+right MB.
+This gives us antenna ratios that triggered the error. The ratio of the area of the metal to the area of the gate is more than twice the permissible value of 400. There are 2 ways to fix this. First, we can tie down the route to a piece of diffusion (which acts like a diode). The antenna check tells us the error is at metal2, so we can place a standard cell diffusion diode anywhere at metal2. In this example, the diode is already places on th left of the cell, and we just need to wire the input where the violation starts to the diode as shown below. The wire needs to be contacted down into the diode with the SHIFT+right MB.
 
 ![10 ant fix](Day3/3-86.png)
 
@@ -1082,7 +1082,7 @@ Here, the metal1 layer is just a thin section going around the layout, which dep
 
 ![11 cov](Day3/3-91.png)
 
-This agrees with our last point that metal1 covers only 5.6% of the cell while metal2 covers 85.7%. But foundries do not check for the average density accross the whole layout, instead they do complicated calculations over fixed window sizes to find densities. Hence, we use a script to do this in Magic, using a script provided by the process PDK.
+This agrees with our last point that metal1 covers only 5.6% of the cell while metal2 covers 85.7%. But foundries do not check for the average density across the whole layout, instead they do complicated calculations over fixed window sizes to find densities. Hence, we use a script to do this in Magic, using a script provided by the process PDK.
 
 To do this, we first do `gds write exercise11` in the Magic console, then open a new terminal to run the density check script as follows.
 
@@ -1116,7 +1116,7 @@ Now, we can check for density coverage again by setting the cif output style to 
 
 ![11 merge res](Day3/3-99.png)
 
-As we see above, metal1 density is now within the permissible limits. However, metal2 is still way out of bounds, since not much can be done to fix over-density apart from physically removing metal layers from the design. The other layers like metal3 have now been filled as well, so they are all within the permissible density limits, instead of bieng empty with 0% density.
+As we see above, metal1 density is now within the permissible limits. However, metal2 is still way out of bounds, since not much can be done to fix over-density apart from physically removing metal layers from the design. The other layers like metal3 have now been filled as well, so they are all within the permissible density limits, instead of being empty with 0% density.
 
 ## Day 5 - Running Layout Vs. Schematic
 
@@ -1124,17 +1124,17 @@ As we see above, metal1 density is now within the permissible limits. However, m
 
 LVS and DRC are the 2 principle forms of sign-off validation before sending a chip for fabrication to the foundry. While the foundry will perform a full DRC on your design, they do not perform LVS, since the foundry has no way of knowing the behaviour/function of your design or what it is supposed to do. If your design does not meet LVS however, it has the potential to come back from manufacturing just as dead as a chip that fails DRC would.
 
-LVS tools are extremely fast and efficient at doing 1 thing, and that is to tell you whether the 2 netlists match or not. However, when netlists do not match, these tools are extremely poor at telling you the exact reason for it. Thus, knowing how to read and the results of a LVS tool and figure out what the problem is, is paramnount for a verification engineer.
+LVS tools are extremely fast and efficient at doing 1 thing, and that is to tell you whether the 2 netlists match or not. However, when netlists do not match, these tools are extremely poor at telling you the exact reason for it. Thus, knowing how to read and the results of a LVS tool and figure out what the problem is, is paramount for a verification engineer.
 
 Any LVS tool needs the schematic and layout netlists, and traditionally, netlists used for this purpose are in .spice format, though any format with enough information on the circuit will work just fine (lef/def, verilog, blif, etc). Netgen accepts spice and verilog formats, which are both simulatable.
 
-The traditional LVS flow follows a schematic tapture, where the schematic is converted to a netlist. An alternative to this, is to start from RTL verilog instead, which is a behavioural description and not physical desription of the design. In this case, synthesis tools like yosys are used which map behavioural verilog to gate level netlists. This netlist goes through a synthesis back end to be layout compatible.
+The traditional LVS flow follows a schematic tapture, where the schematic is converted to a netlist. An alternative to this, is to start from RTL verilog instead, which is a behavioural description and not physical description of the design. In this case, synthesis tools like yosys are used which map behavioural verilog to gate level netlists. This netlist goes through a synthesis back end to be layout compatible.
 
 ### Schematics and LVS Matching
 
-An important part of creating schematics for larger projects, is keeping the hierarchy of a schematic matched to the hierarchy of the layout. Though generally, layouts tend to have more hierarchical layers due to bundling of similar cells, guard rings, etc; but the LVS tool is designed to deal with extra layers of hierarchy. Hierarhy makes good practice, sincing working through LVS at a block level is much easier than working through it at a transistor level. Errors can easily be contained in blocks and pinpointed.
+An important part of creating schematics for larger projects, is keeping the hierarchy of a schematic matched to the hierarchy of the layout. Though generally, layouts tend to have more hierarchical layers due to bundling of similar cells, guard rings, etc; but the LVS tool is designed to deal with extra layers of hierarchy. Hierarchy makes good practice, since working through LVS at a block level is much easier than working through it at a transistor level. Errors can easily be contained in blocks and pinpointed.
 
-The way LVS matching works, in simple terms, is to check for devices and nets. If a device in both netlists 'looks the same', which means it has the same type of nets connected to device terminals it maye be the same. Similarly, if a net in both netlists is connected to the same type of device, both nets may be the same as well.
+The way LVS matching works, in simple terms, is to check for devices and nets. If a device in both netlists 'looks the same', which means it has the same type of nets connected to device terminals it may be the same. Similarly, if a net in both netlists is connected to the same type of device, both nets may be the same as well.
 
 ### LVS Netlists Vs. Simulation Netlists
 
@@ -1148,7 +1148,7 @@ The way LVS matching works, in simple terms, is to check for devices and nets. I
 ||Parasitic Inductors|
 ||Parasitic mutual inductance|
 
-Netlists for simulation contain parasitics for more accurate simulations of chip behaviour. These parasitics come from the physical arrangement of the layout, and do not exist in the schematic. Since the LVS tool will see these parasitics as seperate components, the design will instantly fail the LVS check due to a different number of components. So, any netlist passed to an LVS tool should be created without parasitics. In magic, to prepare LVS netlists we must only use the following extraction commands.
+Netlists for simulation contain parasitics for more accurate simulations of chip behaviour. These parasitics come from the physical arrangement of the layout, and do not exist in the schematic. Since the LVS tool will see these parasitics as separate components, the design will instantly fail the LVS check due to a different number of components. So, any netlist passed to an LVS tool should be created without parasitics. In magic, to prepare LVS netlists we must only use the following extraction commands.
 
 ```
 extract do local
@@ -1171,7 +1171,7 @@ netgen -batch netgen_command
 
 ### Netgen Matching Algorithm
 
-The way the core netgen algorithm works is in iterations. In the first iteration, netgen creates 2 lists, one with all devices in both netlists (and/or subcircuits if any), and one with all nets from both netlists. These lists are called partitions, though nothing has been partitioned yet on the first iteration. Next, each device in the device list gets assigned a number, which is the hash of the dvice name. Each of the device's pins get assigned a number, which is a hash of the pin name. It is necessary to ensure that devices and pins in one netlist which are supposed to be the same as devics and pins in the other netlist have the same hash number. Which means lowest level devices in both netlists must have the same device and pin names.
+The way the core netgen algorithm works is in iterations. In the first iteration, netgen creates 2 lists, one with all devices in both netlists (and/or subcircuits if any), and one with all nets from both netlists. These lists are called partitions, though nothing has been partitioned yet on the first iteration. Next, each device in the device list gets assigned a number, which is the hash of the dvice name. Each of the device's pins get assigned a number, which is a hash of the pin name. It is necessary to ensure that devices and pins in one netlist which are supposed to be the same as devices and pins in the other netlist have the same hash number. Which means lowest level devices in both netlists must have the same device and pin names.
 
 Next, netgen runs through all of the nets in the list of nets, and assigns them a hash number that is based on a combination of the hash numbers assigned to each of the pins that the net is connected to. So, all nets that are connected to the same pins of the same devices, get the same hash number.
 
@@ -1179,23 +1179,23 @@ Next, Netgen runs through all of the devices in the device list and assigns them
 
 After this, netgen creates a group of nets, all of which have the same hash number, and a group of devices, all of which have the same hash number. These groups are called partitions. Each partition is like an independent netlist and netgen can repeat the procedure for each of the nets and devices in each partition, causing partitions to divide further. Ideally, the process ends when there are as many partitions as there are devices and nets. Which means each partition contains exactly 2 nets or devices, one belonging to the first netlist and the other belonging to the second. In this case, netgen has found a unique 1:1 match for every device and every net in the circuits.
 
-Any partition that contains a different number of devices or nets from one netlist compared to the other, indicates a mismatch. If any iteration does not create new partitions, but there are still partitions thta have more than 1 entry from the same netlist, means there is an error. In this case, netgen then dumps the contents of all partitions that are not 1 to 1. Though these partition dumps give no information as to how are why there is a mismatch.
+Any partition that contains a different number of devices or nets from one netlist compared to the other, indicates a mismatch. If any iteration does not create new partitions, but there are still partitions that have more than 1 entry from the same netlist, means there is an error. In this case, netgen then dumps the contents of all partitions that are not 1 to 1. Though these partition dumps give no information as to how are why there is a mismatch.
 
 ### Pre-Matching Analysis and Hierarchical Checking
 
-An issue with the core matching algorithm is that the output can get very large, very quickly if there are a large number of devices and nets in the design. The best way to keep the output under control is to run a hierarchical check. This means parsing through the hierarchy of subcircuits in both netelists, and comparing each subcircuit independently. However, the hierarchy of circuit layouts and scematics do not always match, with the layouts usually having additional hierarchy. To work around this, netgen uses a pre-match analysis.
+An issue with the core matching algorithm is that the output can get very large, very quickly if there are a large number of devices and nets in the design. The best way to keep the output under control is to run a hierarchical check. This means parsing through the hierarchy of subcircuits in both netlists, and comparing each subcircuit independently. However, the hierarchy of circuit layouts and schematics do not always match, with the layouts usually having additional hierarchy. To work around this, netgen uses a pre-match analysis.
 
-Before it starts matching, netgen takes a look at the devices on each side and try to count whether both netlists have the same number of devices or subcircuits of the same name. If it finds something in one netlist that is not in the other, then it checks to see whether one of the unmathed entries is actually a subcircuit wrapper. If it pulls the contents of a subcircuit into the parent circuit, and that made a better match, then the subcircuit was probably a wrapper. The procedure then is to flatten the subcircuit to ensure a better match. Netgen now runs this pre-match analysis till both circuits have the same number of devices of the same name on each side; or until it cannot find a better result by slectively flattening subcircuits. Thus, all subcircuit wrappers do not need to show up in the final result, except for saying that they were flattened. 
+Before it starts matching, netgen takes a look at the devices on each side and try to count whether both netlists have the same number of devices or subcircuits of the same name. If it finds something in one netlist that is not in the other, then it checks to see whether one of the unmatched entries is actually a subcircuit wrapper. If it pulls the contents of a subcircuit into the parent circuit, and that made a better match, then the subcircuit was probably a wrapper. The procedure then is to flatten the subcircuit to ensure a better match. Netgen now runs this pre-match analysis till both circuits have the same number of devices of the same name on each side; or until it cannot find a better result by selectively flattening subcircuits. Thus, all subcircuit wrappers do not need to show up in the final result, except for saying that they were flattened. 
 
-If 2 subcircuits in a schematic and layout are wired up differently, then they should also be named differently, otherwise a lot of confusion can result; though this is somewhat common. When netgen does hierarchical checks, it traverses the hierarchy from top to bottom. It then works its way back up to the top, creating a queue of sucircuits to match that are ordered from lowest ot highest level. It then checks each pair of subcircuits, starting from the bottom most. If any match attempt succeeds, it treats that as validated and moves on. When a validated subcircuit appears again in later checks, it can be treated as a black box with pins since everything inside it has alrady been confirmed matching on both sides. If this match attempt for a subcircuit fails, then netgen automatically flattens its contents and dups then in the parent cell, everywhere in the design.
+If 2 subcircuits in a schematic and layout are wired up differently, then they should also be named differently, otherwise a lot of confusion can result; though this is somewhat common. When netgen does hierarchical checks, it traverses the hierarchy from top to bottom. It then works its way back up to the top, creating a queue of subcircuits to match that are ordered from lowest to highest level. It then checks each pair of subcircuits, starting from the bottom most. If any match attempt succeeds, it treats that as validated and moves on. When a validated subcircuit appears again in later checks, it can be treated as a black box with pins since everything inside it has already been confirmed matching on both sides. If this match attempt for a subcircuit fails, then netgen automatically flattens its contents and dups then in the parent cell, everywhere in the design.
 
-When flattening contents like such, if there is a real error accross both netlists, the error propagates up the hierarchy, flagging issues up to higher level cells as well. Since this beats the whole concept of hierchical chekcing, there are 2 methods to counteract this. The first is to concentrate efforts on matching lower level cells first. This is because once lower level cells are fixed, running LVS on the netlists again may resolve some of the higher level flagged errors as well making them easier to diagnose. The other strategy is to add arguments in the netgen command line to prevent netgen from flattening specific subcells. Then netgen will say that the subcells failed matching, dump the list of unmatched devices, and move on.
+When flattening contents like such, if there is a real error across both netlists, the error propagates up the hierarchy, flagging issues up to higher level cells as well. Since this beats the whole concept of hierarchical checking, there are 2 methods to counteract this. The first is to concentrate efforts on matching lower level cells first. This is because once lower level cells are fixed, running LVS on the netlists again may resolve some of the higher level flagged errors as well making them easier to diagnose. The other strategy is to add arguments in the netgen command line to prevent netgen from flattening specific subcells. Then netgen will say that the subcells failed matching, dump the list of unmatched devices, and move on.
 
 ### Pin and Property Checking
 
 While pins are important, pin names are not. Netgen does not care what the pins for devices are called in each circuit. What it does care about is that the equivalent circuit in each of the netlists has the same number of pins, and that each of those pins has an exact equivalent in the other netlist.
 
-Sometimes, one circuit may declare an extra pin that is not present on the other circuit, but nothing may connect to that pin, in which case it does not actualy matter if that pin doesn't have a match. When this occurs, netgen creates a proxy pin (pin with no internal connect) in the other circuit to account for the missing pin. Sometimes, these proxy pins may also show up in the list of mismatches.
+Sometimes, one circuit may declare an extra pin that is not present on the other circuit, but nothing may connect to that pin, in which case it does not actually matter if that pin doesn't have a match. When this occurs, netgen creates a proxy pin (pin with no internal connect) in the other circuit to account for the missing pin. Sometimes, these proxy pins may also show up in the list of mismatches.
 
 While topology is important for netlist checking, details like transistor width, length, etc. are also important to match. These are known as properties. Matching these can be somewhat challenging in cases where the schematic width is large, and the layout designer may replace this width a transistor of multiple fingers that together make up the same width. Thus the LVS tool should be able to tell that these are matching.
 
@@ -1205,7 +1205,7 @@ Once the topologies have been checked, netgen checks the properties of the devic
 
 ### Series/Parallel Combining
 
-Netgen does not completely simplify or reduce networks dwon to the bare minimum, since its goal is to match networks not simplify them. It just tries to simplify one network till it matches the other network, and no more.
+Netgen does not completely simplify or reduce networks down to the bare minimum, since its goal is to match networks not simplify them. It just tries to simplify one network till it matches the other network, and no more.
 
 The most common use of series/parallel combining is the case mentioned earlier, where the total width of the device has been split up to form multiple devices. This is common for high valued resistors.
 
@@ -1213,48 +1213,48 @@ The LVS tool has simple rules for series/parallel combinations, and does this ov
 
 Some essential device rules are:
 1. Transistors combine in parallel
-* For same L, parallel W can be merged by adding
+ * For same L, parallel W can be merged by adding
 2. Capacitors combine in parallel
-* can merge parallel devices by adding area
+ * can merge parallel devices by adding area
 3. Resistors combine in parallel and series
-* For same W, series L can merge by adding
-* For same W, parallel L can merge by parallel addition
+ * For same W, series L can merge by adding
+ * For same W, parallel L can merge by parallel addition
 
-A common problem in schematics for spice simulators is the use of components like a 0V voltage source (for measuring current in a wire), or a 0 ohm resistor (to split nets). But these are ideal sources and do not exist outside of simulation, so them=y must be replaced with simple wire. Netgen is geared to make these adjustments for LVS. Net-breaking resistors in layouts, however, must be present in the schematic as well since it is a physical thing and has physical width and lenght, ergo resistance. Similarly, dummy devices are a thing that only occur in layouts as layout considerations, since they affect circuit behaviour, but not in a way that would show up in simulation. Netgen's policy on these are to only exclude devices for matching purposes that have all their pins tied together.
+A common problem in schematics for spice simulators is the use of components like a 0V voltage source (for measuring current in a wire), or a 0 ohm resistor (to split nets). But these are ideal sources and do not exist outside of simulation, so them=y must be replaced with simple wire. Netgen is geared to make these adjustments for LVS. Net-breaking resistors in layouts, however, must be present in the schematic as well since it is a physical thing and has physical width and length, ergo resistance. Similarly, dummy devices are a thing that only occur in layouts as layout considerations, since they affect circuit behaviour, but not in a way that would show up in simulation. Netgen's policy on these are to only exclude devices for matching purposes that have all their pins tied together.
 
 ### Symmetry Breaking
 
-Sometimes, it is possible for netlists without a 1:1 correspendence to be matching. They can have 2:2 or 3:3 or so on, and still match, as long as the same number of devices are on both sides, and all of these devices end up in the same partition. This means that these devices are truly indistinguishable, and no attempt to repartition the netlist will seperate them. These represent symmetries in the circuit.
+Sometimes, it is possible for netlists without a 1:1 correspondence to be matching. They can have 2:2 or 3:3 or so on, and still match, as long as the same number of devices are on both sides, and all of these devices end up in the same partition. This means that these devices are truly indistinguishable, and no attempt to repartition the netlist will separate them. These represent symmetries in the circuit.
 
-It is, however, impossible to tell at a glance whether 2 resultant partitions with the same number of devices on each side are a symmetry or error. To figure it out, Netgen does symmetry breaking. It pulls one device or net from each of the partition, then assigns them a random new hash to seperate them from the other devices/nets in the partition. Then it runs the matching algorithm again. If the devices/nets are symmetric, then it will end up in the same state, just with one less device/net in the partition. If the number of devices/nets in both partitions are different now, that means it is an error. Netgen repeats this till it ends up with just a single device/net in every partition, then it really was a symmetry and not an error; and will state in the result how many symmetries occured and that the netlists are uniquely matching.
+It is, however, impossible to tell at a glance whether 2 resultant partitions with the same number of devices on each side are a symmetry or error. To figure it out, Netgen does symmetry breaking. It pulls one device or net from each of the partition, then assigns them a random new hash to separate them from the other devices/nets in the partition. Then it runs the matching algorithm again. If the devices/nets are symmetric, then it will end up in the same state, just with one less device/net in the partition. If the number of devices/nets in both partitions are different now, that means it is an error. Netgen repeats this till it ends up with just a single device/net in every partition, then it really was a symmetry and not an error; and will state in the result how many symmetries occurred and that the netlists are uniquely matching.
 
 Before it attempts this symmetry breaking, Netgen does check pin assignments on the devices in the partitions to confirm if the pin assignments break the symmetry. This ensures symmetries connected to the same pin are treated as symmetries while symmetries that are just internal to the circuit, like multiple of the same transistor in different pin assignment, are not. Another way to break symmetry is to check for device properties across the device groups.
 
-### Iterpreting Netgen Results
+### Interpreting Netgen Results
 
-Netgen will generate a report on each pair of subcircuit that it matches, in order from the bottom up. Traditionally, the layout netlist is specified before the schematic netlist, and appears on the left side of the results, with the schemaic netlist appearing on the right. Though this depends on the designer, and the order that they specify the netlists in the command. Otherwise, Netgen treats both netlists as the same, meaning layout netlists are not treated in a seperate manner than schematic netlists, and are completely interchangeable.
+Netgen will generate a report on each pair of subcircuit that it matches, in order from the bottom up. Traditionally, the layout netlist is specified before the schematic netlist, and appears on the left side of the results, with the schematic netlist appearing on the right. Though this depends on the designer, and the order that they specify the netlists in the command. Otherwise, Netgen treats both netlists as the same, meaning layout netlists are not treated in a separate manner than schematic netlists, and are completely interchangeable.
 
 Prior to comparing any subcells, netgen will first dump a list of what cells it flattened because it couldn't find any equivalent subcircuit in the opposing netlist to match it to (list of cells flattened due to non-matching hierarchy).
 
-Next, Netgen will also print a report on its atempts to run series/parallel device merging. It prints the circuit contents before and after merging.
+Next, Netgen will also print a report on its attempts to run series/parallel device merging. It prints the circuit contents before and after merging.
 
 The initial report on each pair of subcells will list their contents, including how many of each device and nets were present. It lists these side by side, and any mismatch/missing device will be flagged accordingly. Here, we may find device counts with lower numbers than expected due to series/parallel combining. After this is a simple sanity check that specifies the total number of devices, and total number of nets
 
-After the summary of cell contents is the Pre-match analysis results. It may print iterations of this, as if it finds that flattening a cell will result in a better match, it will do so here accordingly. Sometimes, we may find matching errors in intial summary reports that could get cleared in the latter iterations of the pre-match analysis, so it is important to look out for these.
+After the summary of cell contents is the Pre-match analysis results. It may print iterations of this, as if it finds that flattening a cell will result in a better match, it will do so here accordingly. Sometimes, we may find matching errors in initial summary reports that could get cleared in the latter iterations of the pre-match analysis, so it is important to look out for these.
 
 Next, we get the topology matching report, saying whether the cells were matched or not. This is where Netgen will differentiate between a match and a unique match. A simple match means there could be symmetries. So Netgen will then attempt symmetry breaking through property, then through pin, and finally through its arbitrary iterative symmetry breaking method. If topology matching succeeds, it then proceeds to show the results of property matching, and may attempt to do more series and parallel merging to get a match. If property matching fails, it dumps a side by side comparison of what properties did not match, and by how much.
 
 If topology matching succeeds, regardless of property matching, netgen then shows the results of pin matching with a side by side list of pins. Pin mismatches/missing pins are flagged here. Any proxy pins will also show up here. If topology matching succeeds but pin matching fails, there will be no dump of failing output because the topology matching didn't produce any. The circuits will be flagged as mismatching.
 
-If topology matching fails, there will be a dump of failing partitions, and are a direct result of the hashing, sorting and core matcing algorithm. There will be 2 blocks of outputs for the 2 things sorted, nets and devices.
+If topology matching fails, there will be a dump of failing partitions, and are a direct result of the hashing, sorting and core matching algorithm. There will be 2 blocks of outputs for the 2 things sorted, nets and devices.
 
 *General rule of thumb - 1:*
-If there are device mismatches in the circuit, then the list of failing nets will be difficult to interpret. A good strategy is to check your circuit for a mimatch in the number of devices. If so, check the list of failing device partitions and try to debug the problem from there. Only check the net mismatches after the device mismatches are solved.
+If there are device mismatches in the circuit, then the list of failing nets will be difficult to interpret. A good strategy is to check your circuit for a mismatch in the number of devices. If so, check the list of failing device partitions and try to debug the problem from there. Only check the net mismatches after the device mismatches are solved.
 
 *General rule of thumb - 2:*
 Always solve the easy to understand problems first, as many harder to interpret issues may get clearer when other related erros have been fixed. This can be an iterative method, and is a normal part of the LVS process.
 
-The run-time or terminal output that gets created by Netgen is actually only a summary, and is useful for a quick look at what might have gone wrong. But for detailed debugging, it is more important to look at actual ouptut which is dumped to a file called comp.out, unless specified differently.
+The run-time or terminal output that gets created by Netgen is actually only a summary, and is useful for a quick look at what might have gone wrong. But for detailed debugging, it is more important to look at actual output which is dumped to a file called comp.out, unless specified differently.
 
 Netgen also offers a second output format in JSON which works in a simple GUI written in python, and is available as part of the Netgen installation. It is accessed by the command `netgen -gui`. One advantage of this view is that columns are not truncated like those in the terminal output due to the limited character length per line.
 
