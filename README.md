@@ -863,15 +863,246 @@ Alternatively, for deep n-wells we can add a full setup with guard rings by simp
 
 ### Lab - Derived Layers
 
-Let us load exercise5.mag, and look at 5a. These derived layers look like a transistor, and we can check to see
+Let us load exercise5.mag, and look at 5a. These derived layers look like a transistor, and we can check to see what the overlapping layer is considered as by using the command `what` shown below.
 
+![5a](Day3/3-44.png)
 
+It is a nmoslvt layer. We can try to recreate this by painting in a layer of ndiff and poly and see what the overlapping layer becomes.
 
+![5a 2](Day3/3-45.png)
 
+As you can see, Magic considers this as an nmos, and not an nmoslvt as before. This is based on the instructions specified in the tech file, so to get a layer of nmoslvt, we must specifically paint in a layer of nmoslvt. We have learnt earlier about Magic's implant layers and how they are used for autogeneration. Let us visualize these implant layers with the following commands.
 
+![5a imp 1](Day3/3-46.png)
 
+Similarly, we can see the implant lvt layer on the nmoslvt using the command below. This is what differentiates the nmoslvt from the nmos we just created.
 
+![5a imp 2](Day3/3-47.png)
 
+Let us look at example 5b. Here we can check the layers with the `what` command as before. 
+
+![5b](Day3/3-48.png)
+
+This is a high voltage nmos and should have an HVI or high voltage implant. We can check this with the command below.
+
+![5b hvi](Day3/3-49.png)
+
+The high voltage implant is slightly larger than even the NSDM implant layer, though the high voltage implant does not cover the tap contact since the sunstrate is always grounded so it technically never gets to see high voltage. Though, there is a high voltage tap and tap contact type which can be painted over the existing tap. Now, if we look at the iplant layer, we can see the HVI implant cob=vers the tap as well.
+
+![5b hvi tap](Day3/3-51.png)
+
+HVI layers must always be kept a certain distance away from regular low voltage layers. We can confirm this by adding a layer of regular ndiff material above, and we get the following DRC error. As it is a derived layer, the DRC error is also a combination of 2 different design rules.
+
+![5b extra](Day3/3-50.png)
+
+Moving onto exercise 5c, poly contacts need a special type of layer etch and not an implant, called NPC or nitride poly cut. The NPC etches through any nitride residue on the poly to ensure firmer contact between the poly and local inteconnect. We can see this using the command below.
+
+![5c 1](Day3/3-52.png)
+
+For the second set of contacts, the NPC layer must bridge between the two contacts to avoid spacing rule errors.
+
+![5c 2](Day3/3-53.png)
+
+For the third set of contacts, magic must generate additional geometry for the NPC layer to satisfy all width and spacing rules.
+
+![5c 3](Day3/3-54.png)
+
+Finally, in the 4th set of contacts we also get additional geometry that may overlap regular diff layers, but still satisfy all design rules.
+
+![5c 4](Day3/3-55.png)
+
+### Lab - Parameterised and PDK Devices
+
+Let us load the fil exercise6.mag and look at layout 6a. Here, we have a parameterised device, which is a device create automatically using magic, and have fixed layouts in the PDKs. It is a simple nmos (MOSFET) device created from the Devices 1 menu with default parameters. While this is a Magic generated device, it still shows up as having DRC errors as follows.
+
+![6a](Day3/3-56.png)
+
+Th error is a metal minimum area rule error, and magic could avoid it by adding more metal to the layer, but it does not since these contacts will be routed to, and have metal connected to it anyway. We can go ahead and fix this by painting in some metal1 over the contacts, and we see no DRC errors.
+
+![6a fix](Day3/3-57.png)
+
+Though, if we descend into the subcell with the > key, we can see that the DRC error does exist, but it is fixed in the hierarchy.
+
+![6a des](Day3/3-58.png)
+
+In 6b, we have an esdfet designed to survive high voltages, and it purposefully breaks design rules. For example, it has a transistor gate at an angle, which is not allowed.
+
+![6b](Day3/3-59.png)
+
+The only way in Magic to ignore rule errors for a dvice that is known good, is to abstract it. Though abstract views are in a seperate lef directry, but that is not what is needed here. All library views are abstract in a way, because they contain pointers to gds files, and thus what is shown is no more than Magic's best attempt to represent the gds data. We can change the layout without changing what is written out to gds, which is dangerous and generally only used for read only files that do not get affected. We can, however, use this to our advantage by making the layout look DRC clean and not flag false positives.
+
+First, we select the cell with the I key, check its file path and change it to the current working directory. Next, we descend into the cell and save it to disk. Now, we can confirm that the cell still points to a valid gds file with the `property` command.
+
+![6b save](Day3/3-60.png)
+
+Now we can start to clear the DRC errors by selecting and erasing the angled poly sections in the layout with the `erase poly` command. We should now see no DRC errors.
+
+![6b fix](Day3/3-61.png)
+
+For exercise 6c, we first save it to the local disk as done earlier.
+
+![6c](Day3/3-62.png)
+
+Now, we can fix the DRC errors using the methods stated earlier.
+
+### Lab - Angle And Overlap Rule
+
+If we recall, Magic has a grid set up that is based on the manufacturing grid provided. The manufacturing grid for this process is 0.005um x 0.005um. Magic scales up the grid by a factor of 2, so the samllest box possible should be 0.01um by 0.01um. To make the box any smaller, we can use `snap internal` then make the box to the size of the manufacturers grid. We could also scale down Magic's internal grid with `scalegrid 1 2`, but it is prohibited.
+
+Similarly, if we create a tringle that is an odd number width, and overlap it with another odd width triangle, magic will try to legalise the overlap vertex as follows.
+
+![7 extra](Day3/3-63.png)
+
+Loading in exercise7.mag, we look at 7a. Here, the triangle based polygon was created into a subcell, then flipped and moved back to overlap. This prevents Magic from compensating for the off-grid overlap by adding a rectangle at the vertex. The DRC error is as follows.
+
+![7a](Day3/3-64.png)
+
+We can fix this easily by selecting one of the shapes and moving it horizontally by one position.
+
+![7a fix](Day3/3-65.png)
+
+For 7b, we have the following error.
+
+![7b](Day3/3-66.png)
+
+The only ay to fix this, is to paint over the angled edge with some local interconnect.
+
+![7b fix](Day3/3-67.png)
+
+For 7c we have another angle error. The shapes seems to be 45 degree angled, but by selecting it and querying the box, we see it is actual 201x200 units on the grid, leading to an angle just smaller than 45 degrees.
+
+![7c](Day3/3-68.png)
+
+We fix this with the following commands to erase and redraw the angled edge at 45 degrees.
+
+![7c fix](Day3/3-69.png)
+
+We can now add small amount of metal1 on top of the shape to sompensate for the width error caused by the additional 1 unit growth, and we get a DRC error free shape.
+
+![7c fix2](Day3/3-70.png)
+
+In 7d, we have an overlap error. This is because the poly and diff layers are in different cells, and then made to overlap. While this should create a transistor in the overlap, because the two layers are in different cells, Magic does not allow this.
+
+![7d](Day3/3-71.png)
+
+The easiest way to fix this is to just paint over the poly subcell again with a layer of poly, and preferably delete the old poly subcell layer. This creates a nmos as shown.
+
+![7d fix](Day3/3-72.png)
+
+In 7e, we can see that overlaps in contacts have different rules. If contacts overlap, they must overlap exactly, for the automatic generation rules. In this example, if we look at the contact cuts, we can see the following. Here the overlapping contact cut has been pushed over to align properly.
+
+![7e1](Day3/3-73.png)
+
+If we push into one of the contact layers, we can see that here the contact cuts are aligned perfectly, and in the top lvele cell the cuts had to have been aranged differently to be error free.
+
+![7e1 zpush](Day3/3-74.png)
+
+To fix this, we can flatten it. This is shown below ehere the flattened copy now is DRC free, as both contacts are now in the same layer and there is no concern of overlap.
+
+![7e1 fix](Day3/3-75.png)
+
+In the next contact layout, we have to VIAs with square contacts that are not aligned properly. This is shown below.
+
+![7e2](Day3/3-76.png)
+
+To fix this, we can easily just select one of them and move them horizontally till they align exactly.
+
+![7e2 fix](Day3/3-77.png)
+
+### Lab - Unimplemented Rules
+
+In exercise8.mag, we first have a seal ring. Seal rings are just layers that have no electrical meaning, and are just a physical barrier between the chip and the outside world. These seal ring layers break multiple design rules, and are not worth the effort to include in the tech file. Thus, Magic shows these seal rings as a kind of abstract view which is designed to be DRC free, with  no properties associated with it. If you try to paint diffusion layers over this, you will get overlap errors.
+
+![8a](Day3/3-78.png)
+
+So the SkyWater PDK actually has a seal ring generator that can generate gds correct seal rings, though these cannot be imported into Magic unless as abstract views.
+
+To generate seal rings, all we need to know is the size of the outer edge of our pad frame. We can use the seal ring generator with the command below.
+
+```
+/usr/share/pdk/sky130A/libs.tech/magic/seal_ring_generator/sky130_gen_sealring.py <width> <height> <target_directory>
+```
+This should create a .mag and .gds file in the directory. Next, we open up the magic console and use the command `addpath <created_directory>`, and then open up the seal ring file with `load <file_name>`. If we push into this abstract, we can actually see that the `property` command for this references the just created .gds file. Now, we can run a script launch for magic that runs magic with the appropriate tech file to view the seal ring, with the command `./gds_magic`. Now we load the gds file with `gds read seal_test/adv_6um_gen` to see the seal ring.
+
+### Lab - Latch-up and Antenna Rules
+
+In exercise9.mag, we have a layout with standard cells that violates some of the basic rules we saw earlier, as well as depicts latch-up violations.
+
+![9](Day3/3-79.png)
+
+First, we must add taps to the diffusion layers. Since it is a standard cell, it should come with a tap cell that is part of the standard cell library. We can place down the tap cell as follows.
+
+![9 tap](Day3/3-80.png)
+
+Now, we can select and move the tap cell to align it properly with the other cells, thus fixing the error.
+
+![9 fix](Day3/3-81.png)
+
+Next, we can look at ERC or electrical rule checks, specifically antenna rules. Let us look at exercise10.mag, which has a few standard cell layout with very long route between them.
+
+![10](Day3/3-82.png)
+
+To run an electrical rule check, some knowledge of the circuit is required to evaluate the rule. To get knowledge of the circuit, the circuit needs to be extracted. We can extract the layout as follows.
+
+![10 ext](Day3/3-83.png)
+
+Now, we can run an antenna check as follows. The antenna check shows up as feedback on the layout, and we can use `feedback why` for some more information on it.
+
+![10 ant](Day3/3-84.png)
+
+For detailed information, we can do the following.
+
+![10 ant debug](Day3/3-85.png)
+
+This gives us antenna ratios that triggered the error. The ratio of the area of the metal to the area of the gate is more than twice the permissible value of 400. There are 2 ways to fix this. First, we can tie down the route to a pice of diffusion (which acts like a diode). The antenna check tells us the error is at metal2, so we can place a standard cell diffusion diode anywhere at metal2. In this example, the diode is already places on th left of the cell, and we just need to wire the input where the violation starts to the diode as shown below. The wire needs to be contacted down into the diode with the SHIFT+right MB.
+
+![10 ant fix](Day3/3-86.png)
+
+Now, if we extract and run an antenna check, we see no feedback and no error message. This means the antenna violation is cleared. Another way to fix an antenna violation is to manually check the route path and fix it.
+
+First, we can hide the metal3 and via layers above the metal2 layer to get a clearer grasp of the antenna formation. This is done below.
+
+![10 ant 2](Day3/3-87.png)
+
+Here, the metal2 route forms an antenna before the next layer of metal3 is fabricated over it during manufacturing. Now that we know the only thing causing the long metal2 rout to be untied during manufacturing is that single metal3 route, we can easily replace it with metal2 to ensure both ends are tied.
+
+![10 ant fix](Day3/3-88.png)
+
+Here, we use the wiring tool to wire a metal1 route to avoid antenna violations. We can check and see that we now have no antenna violations, as follows.
+
+![10 ant fix](Day3/3-89.png)
+
+### Lab - Density Rules
+
+SkyWater uses a window size of 700 by 700 microns to run density checks. Let us look at exercise10.mag, which has a large layout containing metal1 and metal2 layers.
+
+![11](Day3/3-90.png)
+
+Here, the metal1 layer is just a thin section going around the layout, which depicts under-density for that metal layer. Similarly, metal2 covers pretty much the entire layout, leading to over-density for the metal2 layer. To check for density coverage, we use the following commands.
+
+![11 cov](Day3/3-91.png)
+
+This agrees with our last point that metal1 covers only 5.6% of the cell while metal2 covers 85.7%. But foundries do not check for the average density accross the whole layout, instead they do complicated calculations over fixed window sizes to find densities. Hence, we use a script to do this in Magic, using a script provided by the process PDK.
+
+To do this, we first do `gds write exercise11` in the Magic console, then open a new terminal to run the density check script as follows.
+
+![11 den script](Day3/3-92.png)
+
+If we now look at the results, we can see the following errors.
+
+![11 den script res](Day3/3-93.png)
+
+To fix this, we use a fill generator script provided by the PDK as follows.
+
+![11 fill script](Day3/3-94.png)
+
+Now we can go ahead and do a gds read of the generated file in magic with the command below. 
+
+![11 fill res](Day3/3-95.png)
+
+Here, we see the fill patterns generated for the entire layout. To see only a specific layer, for example metal2, we use the commands below. First we hide all layers, then show m2fill layer which is a special fill layer for metal2.
+
+![11 fill res](Day3/3-96.png)
 
 
 
