@@ -1752,7 +1752,7 @@ Now that we have added it into the verilog as well, we can run LVS again on the 
 ## Acknowledgements
 
 - [R. Timothy Edwards](https://github.com/RTimothyEdwards)
-- [Kunal Gosh](https://github.com/kunalg123)
+- [Kunal Ghosh](https://github.com/kunalg123)
 - [VSD-IAT](https://vsdiat.com/)
 
 <!-- day 1 Physical Verification and Design Flows, skywater libs. day 2 gds i/o styles/issues, abstract end exercise extra, extract extra exc inv, day 3 ex 6c, ex12, day 5 ex 8.5 onw-->
