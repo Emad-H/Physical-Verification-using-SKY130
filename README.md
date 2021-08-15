@@ -70,6 +70,7 @@ A 5 day cloud based virtual training workshop conducted by VSD-IAT from 11<sup>t
     + [Lab - Layout Vs. Verilog for Standard Cell](#lab---layout-vs-verilog-for-standard-cell)
     + [Lab - LVS with Macros](#lab---lvs-with-macros)
     + [Lab - LVS for Digital PLL Design](#lab---lvs-for-digital-pll-design)
+  - [Acknowledgements](#acknowledgements)
 
 ## Day 1 - Introduction to SkyWater SKY130 and Open-Source EDA Tools
 
@@ -309,7 +310,7 @@ The GDSII format is now the industry standard accross foundries for representing
 
 The layout tool needs to be able to independently generate a netlist by looking at nothing other than the mask geometry of the layout. This process is known as Extraction. Extraction in Magic is a two stage process, wherein magic generates an intermediate netlist format called the .ext, after which it is converted to the required netlist format such as spice.
 
-![ext-in-mag](Dta2/2-1.png)
+![ext-in-mag](Day2/2-1.png)
 
 All devices, instances, connections between cells, subcells, nets, as well as parasitics are present in the netlist. This netlist can be fed to a simulator such as Ngspice, along with a schematic captured netlist to compare the results of the two. 
 
@@ -758,11 +759,7 @@ We can select the metal layer and run a DRC report for it. We should see no erro
 
 ![drc width 2](Day3/3-3.png)
 
-As it is a width error, we can check the width of the metal layer y selecting it and pressing the B key, which tells the dimensions of the cursor box.
-
-![drc width b](Day3/3-4.png)
-
-Here we see it is 0.06 microns, while the minimum width should be 0.14 microns. To visualize distances better, we can set the grid to be on by going to the menu button Window > Set Grid 0.10um. We can also turn on the setting 'Snap-to-grid on' from the same menu.
+As it is a width error, we can check the width of the metal layer y selecting it and pressing the B key, which tells the dimensions of the cursor box. Here we see it is 0.06 microns, while the minimum width should be 0.14 microns. To visualize distances better, we can set the grid to be on by going to the menu button Window > Set Grid 0.10um. We can also turn on the setting 'Snap-to-grid on' from the same menu.
 
 To increase the width of the metal layer, we can either manually set the cursor box to the size required, then paint it using the middle mouse button. Or we can do it via console commands by typing `box width 0.14um` and `paint m2`.
 
@@ -1327,7 +1324,7 @@ Netgen also offers a second output format in JSON which works in a simple GUI wr
 
 ### Lab - Introduction to LVS
 
-The first step is to run a git clone to obtain all files neccessary for the following labs. We should now have the following subdirectories.
+The first step is to run a git clone to obtain all files necessary for the following labs. We should now have the following subdirectories.
 
 ![gitclone5](Day5/5-0.png)
 
@@ -1335,7 +1332,7 @@ Let us proceed with exercise 1. Here, we have 2 spice netlists with the same con
 
 ![1 contents](Day5/5-1.png)
 
-They have 3 cells, with 3 pins each. We can call Netgen by typing the ecommand `netgen` in the terminal. Let us try to run a LVS on the 2 spice files as follows.
+They have 3 cells, with 3 pins each. We can call Netgen by typing the command `netgen` in the terminal. Let us try to run a LVS on the 2 spice files as follows.
 
 ![1 lvs](Day5/5-2.png)
 
@@ -1353,7 +1350,7 @@ However, this is a summary of the results, and we can find the full results in a
 
 ![1 comp](Day5/5-6.png)
 
-Since the circuits match, there really is'nt much information that is needed to be provided by the LVS tool. Note the line that says no pins found, pin matching not needed.
+Since the circuits match, there really isn't much information that is needed to be provided by the LVS tool. Note the line that says no pins found, pin matching not needed.
 
 Let us change netA.spice as follows so that the netlists do not match.
 
@@ -1369,7 +1366,7 @@ If we now run netgen on both the files, we get the following results.
 
 If we look at the net partitions in the result, we can note that the net 3/1 went from net B in column 1 to net C in column 2. Net A on both sides show up as an error due to the mismatches in other nets. This can be ignored. If we look at device mismatches, the first column first entry states that cell 3 instance x3, has pin 1 connected to 3 different pins.
 
->Note: When running LVS on a number of different circuits, you should restart Netgen (or use the command `reinitialize`) as the previous netlists are kept in memory and used even when ininitialising another netlist name in the lvs command.
+>Note: When running LVS on a number of different circuits, you should restart Netgen (or use the command `reinitialize`) as the previous netlists are kept in memory and used even when initialising another netlist name in the lvs command.
 
 ### Lab - LVS with Subcircuits
 
@@ -1377,7 +1374,7 @@ Let us look at exercise 2. We have similar files to the first exercise, but this
 
 ![2](Day5/5-11.png)
 
-If we run LVS on the files, we get the folloing message.
+If we run LVS on the files, we get the following message.
 
 ![2 err](Day5/5-12.png)
 
@@ -1415,15 +1412,15 @@ If we open the comp.out file, we see that pin A in netA.spice has been matched w
 
 ![2 c comp](Day5/5-20.png)
 
-We can run netgen without the GUI using the command `netgen -batch lvs "netA.spice test" "netB.spice test" | tee lvs.log`. Here, the added option ensures that the terminal result is also saved in the log file. We can also add the setup file from the pdk in the command. Additionaly, the option `-json` can be added to create a json version of the comp file.
+We can run netgen without the GUI using the command `netgen -batch lvs "netA.spice test" "netB.spice test" | tee lvs.log`. Here, the added option ensures that the terminal result is also saved in the log file. We can also add the setup file from the pdk in the command. Additionally, the option `-json` can be added to create a json version of the comp file.
 
-### Lab - LVS with Blackboxes Subcircuits
+### Lab - LVS with Blackbox Subcircuits
 
 We shall use a run_lvs shell script for the remaining exercises that allows us to run LVS automatically. In exercise 3, we have the following netlists that have empty subcircuit definitions. Netgen will treat these subcircuits as blackbox entries.
 
 ![3](Day5/5-21.png)
 
-If we now run lvs on these netlists we get the follwoing.
+If we now run lvs on these netlists we get the following.
 
 ![3a lvs](Day5/5-22.png)
 
@@ -1435,11 +1432,11 @@ Now, we edit the order of pins in netA cell1 as follows.
 
 ![3b](Day5/5-24.png)
 
-While netgen does not care about cell order as much, it does care baout pin names in black box entries, and we get a mismatch.
+While netgen does not care about cell order as much, it does care about pin names in black box entries, and we get a mismatch.
 
 ![3b lvs](Day5/5-25.png)
 
-Netgen has treated the pin anmes as meaningful, and can be seen in the comp.out file.
+Netgen has treated the pin names as meaningful, and can be seen in the comp.out file.
 
 ![3b comp](Day5/5-26.png)
 
@@ -1471,7 +1468,7 @@ It is hard for netgen to determine what is a black box entry and what is simply 
 
 ![3e cmd](Day5/5-33.png)
 
-With this option enabled, we see that the ccomp file results state that there are mismatches, but netgen believes cell4 and cell1 in files A and B respectively are so similar that they end up in the same partition.
+With this option enabled, we see that the comp file results state that there are mismatches, but netgen believes cell4 and cell1 in files A and B respectively are so similar that they end up in the same partition.
 
 ![3e comp](Day5/5-34.png)
 
@@ -1493,7 +1490,7 @@ Since the resistors are permutable, changing the order of pins should not make a
 
 ![4b lvs](Day5/5-38.png)
 
-To allow cell swapping, we must sepcifically tell netgen to do so. We must first copy the setup.tcl file for netgen to the local directory and then modify the run_lvs shell script as follows.
+To allow cell swapping, we must specifically tell netgen to do so. We must first copy the setup.tcl file for netgen to the local directory and then modify the run_lvs shell script as follows.
 
 ![4b cmd](Day5/5-39.png)
 
@@ -1516,7 +1513,7 @@ If we run an LVS on this and check the comp file, we see that although netgen no
 
 Let us look at a standard analog design project. This exercise contains both design schematic and layout files for xschem and magic respectively. We will be looking at a project that has 2 power-on-reset circuits, that output a digital signal when the supply voltage hits a certain level and stability, notifying the rest of the circuit that the power supply is good.
 
-First, we must gnerate the netlists. Let us generate the schematic netlist first. Open xschem as follows.
+First, we must generate the netlists. Let us generate the schematic netlist first. Open xschem as follows.
 
 ![5 schem cmd](Day5/5-42.png)
 
@@ -1530,7 +1527,7 @@ Let us generate the netlist with the Netlist button. If we look at the spice fil
 
 ![5 spice](Day5/5-45.png)
 
-To fix this, we open xschem again and click the menu betton Simulation > LVS netlist: Top level is a .subckt and then generate the netlist again. This is shown below.
+To fix this, we open xschem again and click the menu button Simulation > LVS netlist: Top level is a .subckt and then generate the netlist again. This is shown below.
 
 ![5 spice 2](Day5/5-46.png)
 
@@ -1550,11 +1547,11 @@ We get errors in the LVS output, so we can look at the comp file to know more.
 
 ![5 comp](Day5/5-50.png)
 
-Since the standard cells are not included in the netlist, they are treated as blackboxes, and withouth subcircuit definitions they are just numbered 1 to 6. Layout netlist has the full pin names. While netgen does treat them as blackboxes so pin matching errors do not immediately show up in the final count, and netgen instead uses proxy pins.
+Since the standard cells are not included in the netlist, they are treated as blackboxes, and without subcircuit definitions they are just numbered 1 to 6. Layout netlist has the full pin names. While netgen does treat them as blackboxes so pin matching errors do not immediately show up in the final count, and netgen instead uses proxy pins.
 
 ![5 comp2](Day5/5-51.png)
 
-To fix this, we can provide xschem with subcircuit definitions by using the testbench file instead for the netlist as it contains references to the library. We do not need to select the top level is a subckt option here as the top level i the testbench code anwyay.
+To fix this, we can provide xschem with subcircuit definitions by using the testbench file instead for the netlist as it contains references to the library. We do not need to select the top level is a subckt option here as the top level i the testbench code anyway.
 
 ![5b xsch](Day5/5-52.png)
 
@@ -1584,7 +1581,7 @@ Now, let us go back to the wrapper comp file and check the pin errors.
 
 ![5c comp2](Day5/5-60.png)
 
-Here, there is one pin mismatch at the start of the list, followed by a few mismatches at the end. Let us fix the first mismatch. In this case io_analog[4] is mimsatched in the schematic, so lets open Xschem and search for it.
+Here, there is one pin mismatch at the start of the list, followed by a few mismatches at the end. Let us fix the first mismatch. In this case io_analog[4] is mismatched in the schematic, so lets open Xschem and search for it.
 
 ![5c xsch](Day5/5-61.png)
 
@@ -1592,17 +1589,17 @@ We can see that this pin is connected to vdd3v3 on one of the example_por subcel
 
 ![5c getnode](Day5/5-62.png)
 
-Now if we trace this node out to the pins, we see that this is connected to io_clamp_high[0]. Instead, we should seperate these node using a metal wire resistor.
+Now if we trace this node out to the pins, we see that this is connected to io_clamp_high[0]. Instead, we should separate these node using a metal wire resistor.
 
 ![5c getnode](Day5/5-63.png)
 
 ![5c node sep](Day5/5-64.png)
 
-Now magic will consider them as seperate nodes. We must keep note of the width of the resistor in the direction of current flow, which is 11 microns and a height of 1.5 microns. Next, we extract the netlist and run LVS again.
+Now magic will consider them as separate nodes. We must keep note of the width of the resistor in the direction of current flow, which is 11 microns and a height of 1.5 microns. Next, we extract the netlist and run LVS again.
 
 ![5c lcs](Day5/5-65.png)
 
-There is a device mismatch now, since a resistor was added in the layout. We must add it into Xschem as well. As there is no device for resistor metal3, we just use a res_generic_m1.sym instead from the sky130_fd_pr library. Now we open the tb file in Xschem, load into the subcircuit, and add a resistor with the correct propoerties that connects to the io_analog[4] node as well as to a new io_clamp_high[0] node.
+There is a device mismatch now, since a resistor was added in the layout. We must add it into Xschem as well. As there is no device for resistor metal3, we just use a res_generic_m1.sym instead from the sky130_fd_pr library. Now we open the tb file in Xschem, load into the subcircuit, and add a resistor with the correct properties that connects to the io_analog[4] node as well as to a new io_clamp_high[0] node.
 
 ![5c xschem res](Day5/5-66.png)
 
@@ -1628,7 +1625,7 @@ Let us run Magic to view the file in this exercise. We find a digital PLL design
 
 ![ ](Day5/5-70.png)
  
-Since the netlist being compared here is a verilog code, and no schematic capture exists, we can't view a schematic in Xsche. The process here is to directly compare the layout netlist with the verilog. Below is the verilog code for the same.
+Since the netlist being compared here is a verilog code, and no schematic capture exists, we can't view a schematic in Xschem. The process here is to directly compare the layout netlist with the verilog. Below is the verilog code for the same.
 
 ![ ](Day5/5-71.png)
 
@@ -1644,7 +1641,7 @@ This can be confirmed by checking the verilog file for fill nets.
 
 ![ ](Day5/5-74.png)
 
-As we can see, there are fill layers such as FILLER_0_11 present in the verilog. Let us search for these in the layout netlist. We find that there are fill layers, but only nder other decap cells. Let us open Magic and search for the FILLER_0_11 layer directly here in the layout.
+As we can see, there are fill layers such as FILLER_0_11 present in the verilog. Let us search for these in the layout netlist. We find that there are fill layers, but only under other decap cells. Let us open Magic and search for the FILLER_0_11 layer directly here in the layout.
 
 ![ ](Day5/5-75.png)
 
@@ -1670,7 +1667,7 @@ Now, if we pass the files to Netgen using the shell script, we get unique matchi
 
 The following exercise has macros involved, which are smaller synthesized digital blocks inside the top level digital block. If we take a look at the top level verilog code file, we find that the code looks like a gate level verilog netlist with all subcells instantiated already in the file.
 
-Let us look at the layout for rhe same in Magic, and then extract the layout netlist.
+Let us look at the layout for the same in Magic, and then extract the layout netlist.
 
 ![ ](Day5/5-80.png)
 
@@ -1686,7 +1683,7 @@ The rectified gate level verilog file for this design can be found under the ver
 
 ![ ](Day5/5-83.png)
 
-Now when we run LVS, we get the follwoing results.
+Now when we run LVS, we get the following results.
 
 ![ ](Day5/5-84.png)
 
@@ -1696,9 +1693,9 @@ From the comp.out file, it is clear that there are missing gnd pins (vssd1, vssd
 
 ![ ](Day5/5-86.png)
 
-While these pins do exist, we discover that as far as Magic is concerned, they are merged with other gnd pins. This behaviour is common to layout toold when representing substrates for substrate connectivity. To fix this, there is a layer in Magic called isosub that isolates subtrate layers, though currently, Magic cannot isolate multiple substrate layers at one time. This is a feature that is still in development.
+While these pins do exist, we discover that as far as Magic is concerned, they are merged with other gnd pins. This behaviour is common to layout tools when representing substrates for substrate connectivity. To fix this, there is a layer in Magic called isosub that isolates substrate layers, though currently, Magic cannot isolate multiple substrate layers at one time. This is a feature that is still in development.
 
-Instead, to get an LVS match, we can try to merge all GND connections in the verilog to one net. This should be fine, since the ground pins on a chip will eventually all be connected together anyway. This way, if agic cannot seperate the gnd nets, we will ensure that they cannot be seperated in the verilog either.
+Instead, to get an LVS match, we can try to merge all GND connections in the verilog to one net. This should be fine, since the ground pins on a chip will eventually all be connected together anyway. This way, if Magic cannot separate the gnd nets, we will ensure that they cannot be separated in the verilog either.
 
 First, we look at the mgmt_protect_hv submodules inside the gl directory, and add the following commands at the end of the file to merge the gnd nets.
 
@@ -1751,5 +1748,11 @@ for the verilog file, we must locate where dco nets are listed. Once we find the
 ![ ](Day5/5-99.png)
 
 Now that we have added it into the verilog as well, we can run LVS again on the files and should find that the diode mismatch disappears.
+
+## Acknowledgements
+
+- [R. Timothy Edwards](https://github.com/RTimothyEdwards)
+- [Kunal Gosh](https://github.com/kunalg123)
+- [VSD-IAT](https://vsdiat.com/)
 
 <!-- day 1 Physical Verification and Design Flows, skywater libs. day 2 gds i/o styles/issues, abstract end exercise extra, extract extra exc inv, day 3 ex 6c, ex12, day 5 ex 8.5 onw-->
