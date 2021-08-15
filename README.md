@@ -4,6 +4,8 @@
 
 A 5 day cloud based virtual training workshop conducted by VSD-IAT from 11<sup>th</sup> to 15<sup>th</sup> August. The link to the workshop webpage can be found [here](https://www.vlsisystemdesign.com/physical-verification-using-sky130/). Below is a brief, day-wise documentation about the topics covered in the course, along with my implementations of the lab sessions.
 
+>Note: Day 4 of the workshop consisted of demonstration lectures on OpenLane, and as such are not included in the contents of this documention.
+
 ## Table of Contents
 
   * [Day 1 - Introduction to SkyWater SKY130 and Open-Source EDA Tools](#day-1---introduction-to-skywater-sky130-and-open-source-eda-tools)
@@ -32,15 +34,15 @@ A 5 day cloud based virtual training workshop conducted by VSD-IAT from 11<sup>t
     + [Back-end Metal Layer Rules](#back-end-metal-layer-rules)
     + [Local Interconnect Rules](#local-interconnect-rules)
     + [Front-end Rules](#front-end-rules)
-    + [Wells, Taps and Net Rules](#wells--taps-and-net-rules)
+    + [Wells, Taps and Net Rules](#wells-taps-and-net-rules)
     + [Deeps N-Well and High Voltage Rules](#deeps-n-well-and-high-voltage-rules)
     + [Device Rules](#device-rules)
-    + [Miscellaneous Rules and Latch-up, Antenna and Stress Rules](#miscellaneous-rules-and-latch-up--antenna-and-stress-rules)
+    + [Miscellaneous Rules and Latch-up, Antenna and Stress Rules](#miscellaneous-rules-and-latch-up-antenna-and-stress-rules)
     + [Density Rules](#density-rules)
-    + [Recommended, Manufacturing and ERC Rules](#recommended--manufacturing-and-erc-rules)
+    + [Recommended, Manufacturing and ERC Rules](#recommended-manufacturing-and-erc-rules)
     + [Lab - Width and Spacing Rules](#lab---width-and-spacing-rules)
     + [Lab - Wide Spacing and Notch Rules](#lab---wide-spacing-and-notch-rules)
-    + [Lab - Contact Cuts (Via) and its DRC Errors](#lab---contact-cuts--via--and-its-drc-errors)
+    + [Lab - Contact Cuts (Via) and its DRC Errors](#lab---contact-cuts-via-and-its-drc-errors)
     + [Lab - Minimum Area and Minimum Hole Rule](#lab---minimum-area-and-minimum-hole-rule)
     + [Lab - Wells and Deep N-Wells](#lab---wells-and-deep-n-wells)
     + [Lab - Derived Layers](#lab---derived-layers)
@@ -57,7 +59,7 @@ A 5 day cloud based virtual training workshop conducted by VSD-IAT from 11<sup>t
     + [Netgen Matching Algorithm](#netgen-matching-algorithm)
     + [Pre-Matching Analysis and Hierarchical Checking](#pre-matching-analysis-and-hierarchical-checking)
     + [Pin and Property Checking](#pin-and-property-checking)
-    + [Series/Parallel Combining](#series-parallel-combining)
+    + [Series/Parallel Combining](#seriesparallel-combining)
     + [Symmetry Breaking](#symmetry-breaking)
     + [Interpreting Netgen Results](#interpreting-netgen-results)
     + [Lab - Introduction to LVS](#lab---introduction-to-lvs)
@@ -120,7 +122,11 @@ Open_PDKs uses a common installed filesystem structure, where the SkyWater PDKs 
 
 ### Physical Verification and Design Flows
 
-Like functional verification, where we check if the voltages, signals and timings match the specification; physical verification is to check whether you have a mask layout that matches what you think the circuit should be.
+Like functional verification, where we check if the voltages, signals and timings match the specification; physical verification is to check whether you have a mask layout that matches what you think the circuit should be. The general design flow for physical verification is given below.
+
+![inv-dir](Day1/1-21.png)
+
+The two major steps in physical verification are Design Rule Checking, to ensure that your layout matches all the rules provided by the foundy for that specific process, and Layout Vs. Schematic, which is to ensure that your layout netlist matches with your schematic netlist.
 
 ### Lab - Checking Tool Installations
 
