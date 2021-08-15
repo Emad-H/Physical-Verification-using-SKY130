@@ -1248,20 +1248,441 @@ If topology matching succeeds, regardless of property matching, netgen then show
 
 If topology matching fails, there will be a dump of failing partitions, and are a direct result of the hashing, sorting and core matching algorithm. There will be 2 blocks of outputs for the 2 things sorted, nets and devices.
 
-*General rule of thumb - 1:*
+*General rule of thumb - 1:* <br>
 If there are device mismatches in the circuit, then the list of failing nets will be difficult to interpret. A good strategy is to check your circuit for a mismatch in the number of devices. If so, check the list of failing device partitions and try to debug the problem from there. Only check the net mismatches after the device mismatches are solved.
 
-*General rule of thumb - 2:*
+*General rule of thumb - 2:* <br>
 Always solve the easy to understand problems first, as many harder to interpret issues may get clearer when other related erros have been fixed. This can be an iterative method, and is a normal part of the LVS process.
 
 The run-time or terminal output that gets created by Netgen is actually only a summary, and is useful for a quick look at what might have gone wrong. But for detailed debugging, it is more important to look at actual output which is dumped to a file called comp.out, unless specified differently.
 
 Netgen also offers a second output format in JSON which works in a simple GUI written in python, and is available as part of the Netgen installation. It is accessed by the command `netgen -gui`. One advantage of this view is that columns are not truncated like those in the terminal output due to the limited character length per line.
 
-### Lab - 
+### Lab - Introduction to LVS
 
+The first step is to run a git clone to obtain all files neccessary for the following labs. We should now have the following subdirectories.
 
+![gitclone5](Day5/5-0.png)
 
+Let us proceed with exercise 1. Here, we have 2 spice netlists with the same contents barring a title line that is a comment.
 
+![1 contents](Day5/5-1.png)
 
-*day 1 Physical Verification and Design Flows, skywater libs. day 2 gds i/o styles/issues, abstract end exercise extra, extract extra exc inv, day 3 ex 6c, ex12*
+They have 3 cells, with 3 pins each. We can call Netgen by typing the ecommand `netgen` in the terminal. Let us try to run a LVS on the 2 spice files as follows.
+
+![1 lvs](Day5/5-2.png)
+
+As we can see, netgen reads each spice in order and calls the 3 subcells. Since it does not know what each subcell is, it uses placeholder definitions. This is because the spice netlists do not have any subcell definitions included in the netlist. Netgen does not need to know what each subcell does, it just needs to be able to compare the 2 netlists. If we were to pass these netlists to a simulation software, it would certainly return errors as follows.
+
+![1 spice](Day5/5-3.png)
+
+Here are the terminal results of the LVS, which say both circuits match.
+
+![1 lvs1](Day5/5-4.png)
+
+![1 lvs2](Day5/5-5.png)
+
+However, this is a summary of the results, and we can find the full results in a dump file called comp.out in the local directory.
+
+![1 comp](Day5/5-6.png)
+
+Since the circuits match, there really is'nt much information that is needed to be provided by the LVS tool. Note the line that says no pins found, pin matching not needed.
+
+Let us change netA.spice as follows so that the netlists do not match.
+
+![1 a edit](Day5/5-7.png)
+
+If we now run netgen on both the files, we get the following results.
+
+![1 b net](Day5/5-8.png)
+
+![1 b comp1](Day5/5-10.png)
+
+![1 b comp2](Day5/5-9.png)
+
+If we look at the net partitions in the result, we can note that the net 3/1 went from net B in column 1 to net C in column 2. Net A on both sides show up as an error due to the mismatches in other nets. This can be ignored. If we look at device mismatches, the first column first entry states that cell 3 instance x3, has pin 1 connected to 3 different pins.
+
+>Note: When running LVS on a number of different circuits, you should restart Netgen (or use the command `reinitialize`) as the previous netlists are kept in memory and used even when ininitialising another netlist name in the lvs command.
+
+### Lab - LVS with Subcircuits
+
+Let us look at exercise 2. We have similar files to the first exercise, but this time they are using subcircuits instead.
+
+![2](Day5/5-11.png)
+
+If we run LVS on the files, we get the folloing message.
+
+![2 err](Day5/5-12.png)
+
+This is because we have provided subcircuit definitions, not subcircuit calls, which are not active components. Which means the subcircuits are defined but not instantiated. Netgen can match these, but will inform you that the files are empty or with no instantiated devices. If we run these files in a simulator like Ngspice, we would not face the error in the previous example, as it would not read the cells inside the definition yet, and would consider both files empty.
+
+By default, Netgen tries to match at the top level, but we can tell it to compare at a subcircuit level. This is useful when we only want to match 2 specific subcircuits in the netlists, or compare subcircuits in a testbench file. We can do this by specifying subcircuit names as follows.
+
+![2 lvs](Day5/5-13.png)
+
+Let's look at its comp.out results.
+
+![2 comp1](Day5/5-14.png)
+
+![2 comp2](Day5/5-15.png)
+
+We can see the same results as the previous example, but this time it says test and not netA/netB. Also this time, pin matching has been done.
+
+Let us edit netA.spice as follows, by changing the order of pins.
+
+![2 b](Day5/5-16.png)
+
+If we now run LVS on the files, we see that they match uniquely.
+
+![2 b lvs](Day5/5-17.png)
+
+This is because netgen does not care about the order of the pins, as long as the pin names are the same and the connectivity is the same. If we now also change the netA file to swap around the A and C pins as follows.
+
+![2 c](Day5/5-18.png)
+
+We get the following result in LVS.
+
+![2 c lvs](Day5/5-19.png)
+
+If we open the comp.out file, we see that pin A in netA.spice has been matched with pin C in netB.spice, and vice versa. This has been flagged as a mismatch.
+
+![2 c comp](Day5/5-20.png)
+
+We can run netgen without the GUI using the command `netgen -batch lvs "netA.spice test" "netB.spice test" | tee lvs.log`. Here, the added option ensures that the terminal result is also saved in the log file. We can also add the setup file from the pdk in the command. Additionaly, the option `-json` can be added to create a json version of the comp file.
+
+### Lab - LVS with Blackboxes Subcircuits
+
+We shall use a run_lvs shell script for the remaining exercises that allows us to run LVS automatically. In exercise 3, we have the following netlists that have empty subcircuit definitions. Netgen will treat these subcircuits as blackbox entries.
+
+![3](Day5/5-21.png)
+
+If we now run lvs on these netlists we get the follwoing.
+
+![3a lvs](Day5/5-22.png)
+
+The disconnected pins message states that Netgen is treating them as empty subcircuits and not black box entries. If we look at the comp file, we also get disconnected pin entries in the results.
+
+![3a comp](Day5/5-23.png)
+
+Now, we edit the order of pins in netA cell1 as follows.
+
+![3b](Day5/5-24.png)
+
+While netgen does not care about cell order as much, it does care baout pin names in black box entries, and we get a mismatch.
+
+![3b lvs](Day5/5-25.png)
+
+Netgen has treated the pin anmes as meaningful, and can be seen in the comp.out file.
+
+![3b comp](Day5/5-26.png)
+
+We now edit netA.spice pin names again as follows.
+
+![3c](Day5/5-27.png)
+
+If we run lvs, we do not get a match.
+
+![3c lvs](Day5/5-28.png)
+
+The comp file also shows that D and C were missing in the 2 file respectively, and netgen creates proxy pins for the same.
+
+![3c comp](Day5/5-29.png)
+
+![3c comp2](Day5/5-30.png)
+
+Since these are black box entries, netgen can only depend on pin names to compare these circuits and cannot make assumptions about anything else.
+
+Finally, let us edit the netA file again.
+
+![3d](Day5/5-31.png)
+
+The LVS result shows a good match. The comp file shows that the cells were flattened.
+
+![3d comp](Day5/5-32.png)
+
+It is hard for netgen to determine what is a black box entry and what is simply an empty definition. To specify black box entries, we use the -blackbox option to tell netgen that cells with no contents should be treated as black boxes.
+
+![3e cmd](Day5/5-33.png)
+
+With this option enabled, we see that the ccomp file results state that there are mismatches, but netgen believes cell4 and cell1 in files A and B respectively are so similar that they end up in the same partition.
+
+![3e comp](Day5/5-34.png)
+
+### Lab - LVS with SPICE Low Level Components
+
+Let us look at some examples that make us of spice components. Below are the contents of exercise 4.
+
+![4](Day5/5-35.png)
+
+The netlists have resistors, diode and capacitors. Running LVS, we get no errors.
+
+![4 lvs](Day5/5-36.png)
+
+We shall edit netA as follows.
+
+![4b](Day5/5-37.png)
+
+Since the resistors are permutable, changing the order of pins should not make a difference to the result. However netgen still cares about pin names in the top level.
+
+![4b lvs](Day5/5-38.png)
+
+To allow cell swapping, we must sepcifically tell netgen to do so. We must first copy the setup.tcl file for netgen to the local directory and then modify the run_lvs shell script as follows.
+
+![4b cmd](Day5/5-39.png)
+
+We must also add the following lines to the setup file.
+
+```
+permute "-circuit1 cell1" A C
+permute "-circuit2 cell1" A C
+```
+
+Now, if we run LVS we see that there are errors and this is because of the fact the the resistors are permutable already, netgen gets tripped up.
+
+Let us edit the netA file once more as follows.
+
+![4c](Day5/5-41.png)
+
+If we run an LVS on this and check the comp file, we see that although netgen noted the difference in pin names, it was able to match them successfully.
+
+### Lab - LVS For Power-On-Reset Circuit
+
+Let us look at a standard analog design project. This exercise contains both design schematic and layout files for xschem and magic respectively. We will be looking at a project that has 2 power-on-reset circuits, that output a digital signal when the supply voltage hits a certain level and stability, notifying the rest of the circuit that the power supply is good.
+
+First, we must gnerate the netlists. Let us generate the schematic netlist first. Open xschem as follows.
+
+![5 schem cmd](Day5/5-42.png)
+
+This design is hierarchical as shown below.
+
+![5 schem 1](Day5/5-43.png)
+
+![5 schem 2](Day5/5-44.png)
+
+Let us generate the netlist with the Netlist button. If we look at the spice file, we see that a top level subcircuit was commented out.
+
+![5 spice](Day5/5-45.png)
+
+To fix this, we open xschem again and click the menu betton Simulation > LVS netlist: Top level is a .subckt and then generate the netlist again. This is shown below.
+
+![5 spice 2](Day5/5-46.png)
+
+Next, we must create the layout schematic. We run magic using the script and load the file user_analog_project_wrapper.mag.
+
+![5 mag](Day5/5-47.png)
+
+Now we run the extraction command as follows.
+
+![5 mag extract](Day5/5-48.png)
+
+Now we step into the netgen directory and run the shell script run_lvs_wrapper.sh to compare the 2 top level cells.
+
+![5 lvs](Day5/5-49.png)
+
+We get errors in the LVS output, so we can look at the comp file to know more.
+
+![5 comp](Day5/5-50.png)
+
+Since the standard cells are not included in the netlist, they are treated as blackboxes, and withouth subcircuit definitions they are just numbered 1 to 6. Layout netlist has the full pin names. While netgen does treat them as blackboxes so pin matching errors do not immediately show up in the final count, and netgen instead uses proxy pins.
+
+![5 comp2](Day5/5-51.png)
+
+To fix this, we can provide xschem with subcircuit definitions by using the testbench file instead for the netlist as it contains references to the library. We do not need to select the top level is a subckt option here as the top level i the testbench code anwyay.
+
+![5b xsch](Day5/5-52.png)
+
+Now, we must edit the LVS launch script to read this file instead.
+
+![5b runcmd](Day5/5-53.png)
+
+If we run LVS on this, we now see that the net errors have been fixed but we have a lot of unmatched pins.
+
+![5b lvs](Day5/5-54.png)
+
+We can use the following script to run LVS on just a single subcircuit of the netlists. The result shows no errors.
+
+![5b ext cmd](Day5/5-55.png)
+
+![5b ext lvs](Day5/5-56.png)
+
+![5b ext comp](Day5/5-57.png)
+
+The comp file shows some cells were flattened. These cells look like standard cells, and are actually parameterised cells created by Magic. We can see this in the top of the magic layout for this file.
+
+![5b ext layout](Day5/5-58.png)
+
+Now, let us go back to the wrapper comp file and check the pin errors.
+
+![5c comp](Day5/5-59.png)
+
+![5c comp2](Day5/5-60.png)
+
+Here, there is one pin mismatch at the start of the list, followed by a few mismatches at the end. Let us fix the first mismatch. In this case io_analog[4] is mimsatched in the schematic, so lets open Xschem and search for it.
+
+![5c xsch](Day5/5-61.png)
+
+We can see that this pin is connected to vdd3v3 on one of the example_por subcells. Let us find this in the layout with magic. We look for the vdd3v3 connection and find the node it is attached to.
+
+![5c getnode](Day5/5-62.png)
+
+Now if we trace this node out to the pins, we see that this is connected to io_clamp_high[0]. Instead, we should seperate these node using a metal wire resistor.
+
+![5c getnode](Day5/5-63.png)
+
+![5c node sep](Day5/5-64.png)
+
+Now magic will consider them as seperate nodes. We must keep note of the width of the resistor in the direction of current flow, which is 11 microns and a height of 1.5 microns. Next, we extract the netlist and run LVS again.
+
+![5c lcs](Day5/5-65.png)
+
+There is a device mismatch now, since a resistor was added in the layout. We must add it into Xschem as well. As there is no device for resistor metal3, we just use a res_generic_m1.sym instead from the sky130_fd_pr library. Now we open the tb file in Xschem, load into the subcircuit, and add a resistor with the correct propoerties that connects to the io_analog[4] node as well as to a new io_clamp_high[0] node.
+
+![5c xschem res](Day5/5-66.png)
+
+Now, we go back up to the top level tesbench schematic and generate netlist, then run LVS again.
+
+![5c lvs res](Day5/5-67.png)
+
+Now that the number of devices are same, let us look at the net mismatches. Let us open the schematic in Xschem.
+
+![ ](Day5/5-68.png)
+
+Here, we see a number of floating nodes, such as io_oeb. Let us search for this in Magic. We can run a quick `goto` command since w already know the name of the net. If we zoom into the net, we can see that this pin is shorted to the vssd1 node as well.
+
+![ ](Day5/5-69.png)
+
+We can fix this problem easily for all 11 floating nodes, using the method stated earlier. This would be to add the metal3 resistor layers between the nodes to isolate them, then adding matching property metal resistors in the schematic file too. This should result in a matched LVS.
+
+### Lab - Layout Vs. Verilog for Standard Cell
+
+In this exercise, we will look at running layout vs. verilog. We shall use a standard cell design from the efabless caravel chip. This example uses an OpenLane design, so LVS was already conducted on it as part of the design process by OpenLane. <!--but the second is hand routed and open lane is not involve much at all -->
+
+Let us run Magic to view the file in this exercise. We find a digital PLL design. Let us extract the layout file into netlist as follows.
+
+![ ](Day5/5-70.png)
+ 
+Since the netlist being compared here is a verilog code, and no schematic capture exists, we can't view a schematic in Xsche. The process here is to directly compare the layout netlist with the verilog. Below is the verilog code for the same.
+
+![ ](Day5/5-71.png)
+
+Now, we can conduct layout vs. verilog using the run_lvs shell script provided. This gives the following results.
+
+![ ](Day5/5-72.png)
+
+If we take a look at the comp.out file, we see that the tap, fill1 and fill2 nets are missing in the layout.
+
+![ ](Day5/5-73.png)
+
+This can be confirmed by checking the verilog file for fill nets.
+
+![ ](Day5/5-74.png)
+
+As we can see, there are fill layers such as FILLER_0_11 present in the verilog. Let us search for these in the layout netlist. We find that there are fill layers, but only nder other decap cells. Let us open Magic and search for the FILLER_0_11 layer directly here in the layout.
+
+![ ](Day5/5-75.png)
+
+We can see that the `goto` command does indeed find it.
+
+![ ](Day5/5-76.png)
+
+If we expand into this cell however, we see the cell exists, but no relevant devices such as resistors, transistors, etc. appear in it. It is simply a cell with 4 pins on a diff layer. Because of it being "empty", Magic's extraction optimises this cell completely out of the final spice netlist. To fix this, we must explore a method used by OpenLane.
+
+If we open the Netgen setup.tcl file and look for the word "fill", we see the following rule.
+
+![ ](Day5/5-77.png)
+ 
+Here we see that fill and tap cells can be ignored. We can assume that a good place and route tool will never be able to place these fill cells in such a way to mess up design. So in this case, it is okay to ignore this error; though the code for this also depends on the MAGIC_EXT_USE_GDS environment variable. This means that this environment variable must be set before Netgen runs for it to be able to ignore these fill errors. Let us edit the run_lvs shell to add the environment variable as follows.
+
+![ ](Day5/5-78.png)
+
+Now, if we pass the files to Netgen using the shell script, we get unique matching.
+
+![ ](Day5/5-79.png)
+
+## Lab - LVS with Macros
+
+The following exercise has macros involved, which are smaller synthesized digital blocks inside the top level digital block. If we take a look at the top level verilog code file, we find that the code looks like a gate level verilog netlist with all subcells instantiated already in the file.
+
+Let us look at the layout for rhe same in Magic, and then extract the layout netlist.
+
+![ ](Day5/5-80.png)
+
+Once we have this, we can run a layout vs. verilog on the netlists using the run_lvs shell script as follows.
+
+![ ](Day5/5-81.png)
+
+The LVS does not really complete at all, and there are a whole lot of error messages. Netgen tells us that the module mgmt_protect is not structural (gate level) verilog, and thus treated as a blackbox. If we explore the verilog file for the same, we find that at line 242 there is one instance with a `~` operator in front of the signal name. This means that the line here is written in behavioral verilog and cannot be directly compared with a spice netlist.
+
+![ ](Day5/5-82.png)
+
+The rectified gate level verilog file for this design can be found under the verilog/gl subdirectory, so let's edit the run_lvs shell script to match this.
+
+![ ](Day5/5-83.png)
+
+Now when we run LVS, we get the follwoing results.
+
+![ ](Day5/5-84.png)
+
+![ ](Day5/5-85.png)
+
+From the comp.out file, it is clear that there are missing gnd pins (vssd1, vssd2, vssa1 and vssa2) in the layout netlist. Let's open the layout in Magic and search for the missing nets.
+
+![ ](Day5/5-86.png)
+
+While these pins do exist, we discover that as far as Magic is concerned, they are merged with other gnd pins. This behaviour is common to layout toold when representing substrates for substrate connectivity. To fix this, there is a layer in Magic called isosub that isolates subtrate layers, though currently, Magic cannot isolate multiple substrate layers at one time. This is a feature that is still in development.
+
+Instead, to get an LVS match, we can try to merge all GND connections in the verilog to one net. This should be fine, since the ground pins on a chip will eventually all be connected together anyway. This way, if agic cannot seperate the gnd nets, we will ensure that they cannot be seperated in the verilog either.
+
+First, we look at the mgmt_protect_hv submodules inside the gl directory, and add the following commands at the end of the file to merge the gnd nets.
+
+![ ](Day5/5-87.png)
+
+Other submodules do not need this, so we can directly do the changes in the top level module next. We also have to assign the other 2 isolated domains in this module.
+
+![ ](Day5/5-88.png)
+
+Now, when we run LVS again, we find a match.
+
+### Lab - LVS for Digital PLL Design
+
+Let us open the layout in Magic and extract the netlist.
+
+![ ](Day5/5-89.png)
+
+Next, we can run LVS. The result shows that errors are present mainly in the top level modules. This is true because the design here uses standard cells for subcircuits.
+
+![ ](Day5/5-90.png)
+
+![ ](Day5/5-91.png)
+
+![ ](Day5/5-92.png)
+
+As we can see, device mismatches are present in the top level. Because of the device mismatches, the list of net mismatches will be a mess to interpret. So let's deal with the devices first. The comp.out file shows there is a decap mismatch, diode mismatch and also tap/fill mismatches like the ones seen earlier. This last one has an easy fix, so let us update the environment variable in the netgen shell script as follows and run netgen again.
+ 
+![ ](Day5/5-93.png)
+
+Now run Netgen on both netlists. If we check the comp.out file, we see that the fill/tap mismatches disappeared. However, there is sill an unmatched diode_2 element in the layout netlist that isn't present in the verilog file.
+
+![ ](Day5/5-94.png)
+
+![ ](Day5/5-95.png)
+
+If we grep for the word "diode" in the .mag and verilog files, we see that there no diode in the verilog file. This could be because the diode was added into the layout after the schematic to fix a possible antenna violation, and we now need to add the diode into the synthesized netlist to get a match.
+
+![ ](Day5/5-96.png)
+
+First, to figure out how to update the synthesized netlist, we have to find the missing diode cell in the layout. Once we find it, we need to check which node it is connected to. We can do this using the `select cell` command in the Magic console since we already know the missing cell name.
+
+![ ](Day5/5-97.png)
+
+We can see that the diode device connects to the dco node. This is important as we need to make the appropriate connections in the verilog file as well.
+
+![ ](Day5/5-98.png)
+
+for the verilog file, we must locate where dco nets are listed. Once we find them, we can add the missing device with the correct connection as follows.
+
+![ ](Day5/5-99.png)
+
+Now that we have added it into the verilog as well, we can run LVS again on the files and should find that the diode mismatch disappears.
+
+<!-- day 1 Physical Verification and Design Flows, skywater libs. day 2 gds i/o styles/issues, abstract end exercise extra, extract extra exc inv, day 3 ex 6c, ex12, day 5 ex 8.5 onw-->
