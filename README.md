@@ -70,7 +70,7 @@ A 5 day cloud based virtual training workshop conducted by VSD-IAT from 11<sup>t
     + [Lab - Layout Vs. Verilog for Standard Cell](#lab---layout-vs-verilog-for-standard-cell)
     + [Lab - LVS with Macros](#lab---lvs-with-macros)
     + [Lab - LVS for Digital PLL Design](#lab---lvs-for-digital-pll-design)
-  - [Acknowledgements](#acknowledgements)
+  * [Acknowledgements](#acknowledgements)
 
 ## Day 1 - Introduction to SkyWater SKY130 and Open-Source EDA Tools
 
